@@ -19,3 +19,14 @@ class TestProduct(TestCase):
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
+
+    def test_product_initialization_should_have_an_id(self):
+        product = Product(
+            id=1,
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        self.assertEqual(product.id, 1)

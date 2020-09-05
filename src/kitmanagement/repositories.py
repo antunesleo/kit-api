@@ -1,15 +1,31 @@
+from copy import deepcopy
 from typing import List
-
+from src.exceptions import NotFound
 from src.kitmanagement.domain import ProductRepository, Product
 
 
 class InMemoryProductRepository(ProductRepository):
 
     def __init__(self):
-        self.__products = []
+        self.__products : List[Product] = []
 
-    def add(self, product: Product) -> None:
+    def add(self, product: Product) -> int:
+        product = deepcopy(product)
+        product.define_id(self.__next_id())
         self.__products.append(product)
+        return product.id
 
     def list(self, for_read=True) -> List[Product]:
         return self.__products
+
+    def get_by_id(self, product_id) -> Product:
+        for product in self.__products:
+            if product.id == product_id:
+                return product
+        raise NotFound(f'product id: {product_id} not found')
+
+    def __next_id(self) -> int:
+        try:
+            return max(self.__products, key=lambda p: p.id).id + 1
+        except ValueError:
+            return 1

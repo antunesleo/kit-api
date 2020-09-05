@@ -24,9 +24,16 @@ class ProductsResource(ResourceBase):
             api.abort(400, 'My custom message', custom='value')
 
     @api.expect(serializers.product_creation_parser)
+    @api.marshal_with(serializers.product_model, code=201)
+    @api.doc(responses={
+        201: 'It works!',
+        400: 'Checkout the payload and query strings, bad parameter.',
+        500: 'Sorry, this is my own fault.'
+    })
     def post(self):
-        self.__products_service.create_item(serializers.product_creation_parser.parse_args())
-        return self._return_success_created()
+        product_creation_command = serializers.product_creation_parser.parse_args()
+        product = self.__products_service.create_product(product_creation_command)
+        return product, 201
 
     @not_allowed
     def put(self):
