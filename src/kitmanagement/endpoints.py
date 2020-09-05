@@ -15,13 +15,12 @@ class ProductsResource(ResourceBase):
         self.__products_service = kwargs['products_service']
 
     @api.marshal_list_with(serializers.product_model)
-    @api.doc(responses={500: 'Sorry dude, its my fault', 400: 'Dude, what are you saying?'})
+    @api.doc(responses={
+        200: 'It works!',
+        500: 'Sorry, this is my own fault.'
+    })
     def get(self):
-        try:
-            products = self.__products_service.list_products()
-            return products
-        except Exception:
-            api.abort(400, 'My custom message', custom='value')
+        return self.__products_service.list_products()
 
     @api.expect(serializers.product_creation_parser)
     @api.marshal_with(serializers.product_model, code=201)

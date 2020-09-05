@@ -25,3 +25,12 @@ class TestProductsService(TestCase):
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
+
+    def test_should_list(self):
+        products_mock = mock.MagicMock()
+        repository_mock = mock.MagicMock()
+        repository_mock.list.return_value = products_mock
+        service = ProductsService(repository_mock)
+        products = service.list_products()
+        repository_mock.list.assert_called()
+        self.assertEqual(products_mock, products)

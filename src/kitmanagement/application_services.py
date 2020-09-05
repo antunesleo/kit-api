@@ -14,5 +14,5 @@ class ProductsService(ApplicationService):
         product.define_id(product_id)
         return product
 
-    def list_items(self) -> List[Product]:
+    def list_products(self) -> List[Product]:
         return self.__repository.list()
