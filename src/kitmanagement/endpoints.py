@@ -1,6 +1,6 @@
 from src.web_app import get_api
 
-from src.base.endpoints import ResourceBase, not_allowed
+from src.base.endpoints import ResourceBase
 from src.kitmanagement import serializers
 
 
@@ -34,14 +34,6 @@ class ProductsResource(ResourceBase):
         product_creation_command = serializers.product_creation_parser.parse_args()
         product = self.__products_service.create_product(product_creation_command)
         return product, 201
-
-    @not_allowed
-    def put(self):
-        pass
-
-    @not_allowed
-    def delete(self):
-        pass
 
 
 def register(products_service):
