@@ -1,3 +1,4 @@
+from src.exceptions import NotFound
 from src.kitmanagement.domain import Product
 from src.kitmanagement.repositories import InMemoryProductRepository
 from tests.integration.base import TestCase
@@ -5,7 +6,7 @@ from tests.integration.base import TestCase
 
 class TestInMemoryProductRepository(TestCase):
 
-    def test_should_add_product(self):
+    def test_add_should_add_product(self):
         repository = InMemoryProductRepository()
         product = Product(
             name='The Last of Us Part II',
@@ -27,7 +28,7 @@ class TestInMemoryProductRepository(TestCase):
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
         self.assertEqual(2, repository.add(product))
 
-    def test_should_list_products(self):
+    def test_list_should_list_products(self):
         repository = InMemoryProductRepository()
         first_product = Product(
             name='The Last of Us Part II',
@@ -49,7 +50,7 @@ class TestInMemoryProductRepository(TestCase):
         created_products = repository.list()
 
         self.assertIsInstance(created_products, list)
-        self.assertEquals(2, len(created_products))
+        self.assertEqual(2, len(created_products))
 
         self.assertEqual(first_product_id, created_products[0].id)
         self.assertEqual(first_product.name, created_products[0].name)
@@ -62,3 +63,28 @@ class TestInMemoryProductRepository(TestCase):
         self.assertEqual(second_product.SKU, created_products[1].SKU)
         self.assertEqual(second_product.price, created_products[1].price)
         self.assertEqual(second_product.inventory_quantity, created_products[1].inventory_quantity)
+
+    def test_get_by_id_should_get_product_by_id(self):
+        repository = InMemoryProductRepository()
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        product_id = repository.add(product)
+
+        created_product = repository.get_by_id(product_id)
+
+        self.assertIsInstance(product, Product)
+        self.assertEqual(product_id, created_product.id)
+        self.assertEqual(product.name, created_product.name)
+        self.assertEqual(product.SKU, created_product.SKU)
+        self.assertEqual(product.price, created_product.price)
+        self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
+
+    def test_get_by_id_should_raise_not_found_when_cant_find_product(self):
+        repository = InMemoryProductRepository()
+        with self.assertRaises(NotFound):
+            repository.get_by_id(1)

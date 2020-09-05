@@ -1,3 +1,5 @@
+from src.exceptions import NotFound
+from src.kitmanagement.domain import Product
 from src.web_app import get_api
 
 from src.base.endpoints import ResourceBase
@@ -35,5 +37,24 @@ class ProductsResource(ResourceBase):
         return product, 201
 
 
+class ProductResource(ResourceBase):
+
+    def __init__(self, *args, **kwargs):
+        super(ProductResource, self).__init__(*args, **kwargs)
+        self.__products_service = kwargs['products_service']
+
+    @api.marshal_with(serializers.product_model)
+    @api.doc(responses={
+        200: 'It works!',
+        500: 'Sorry, this is my own fault.'
+    })
+    def get(self, product_id):
+        try:
+            return self.__products_service.get_product_by_id(product_id)
+        except NotFound:
+            api.abort(404, 'Product Not Found.', product_id=product_id)
+
+
 def register(products_service):
+    api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})
     api.add_resource(ProductsResource, '/api/products', resource_class_kwargs={'products_service': products_service})

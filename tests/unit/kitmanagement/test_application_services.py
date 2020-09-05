@@ -6,7 +6,7 @@ from tests.unit.base import TestCase
 
 class TestProductsService(TestCase):
 
-    def test_should_create_product(self,):
+    def test_create_product(self,):
         repository_mock = mock.MagicMock()
         service = ProductsService(repository_mock)
         product_creation_command = {
@@ -26,7 +26,7 @@ class TestProductsService(TestCase):
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
 
-    def test_should_list(self):
+    def test_list_products(self):
         products_mock = mock.MagicMock()
         repository_mock = mock.MagicMock()
         repository_mock.list.return_value = products_mock
@@ -34,3 +34,12 @@ class TestProductsService(TestCase):
         products = service.list_products()
         repository_mock.list.assert_called()
         self.assertEqual(products_mock, products)
+
+    def test_get_by_id(self):
+        product_mock = mock.MagicMock()
+        repository_mock = mock.MagicMock()
+        repository_mock.get_by_id.return_value = product_mock
+        service = ProductsService(repository_mock)
+        product = service.get_product_by_id(1)
+        repository_mock.get_by_id.assert_called_with(1)
+        self.assertEqual(product_mock, product)

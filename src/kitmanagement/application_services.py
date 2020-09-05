@@ -16,3 +16,6 @@ class ProductsService(ApplicationService):
 
     def list_products(self) -> List[Product]:
         return self.__repository.list()
+
+    def get_product_by_id(self, product_id) -> Product:
+        return self.__repository.get_by_id(product_id)
