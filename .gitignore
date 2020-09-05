@@ -1,0 +1,11 @@
+.env*
+*.xml
+.idea
+*.pyc
+.pytest_cache
+.coverage
+htmlcov
+.coveralls.yml
+
+data
+kit-api
