@@ -34,6 +34,7 @@ class Product(AggregateRoot):
         return self.__inventory_quantity
 
 
+
 class ProductRepository(ABC):
 
     @abstractmethod
