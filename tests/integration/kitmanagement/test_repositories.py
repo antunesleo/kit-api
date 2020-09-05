@@ -6,7 +6,7 @@ from tests.integration.base import TestCase
 
 class TestInMemoryProductRepository(TestCase):
 
-    def test_add_should_add_product(self):
+    def test_add(self):
         repository = InMemoryProductRepository()
         product = Product(
             name='The Last of Us Part II',
@@ -28,7 +28,7 @@ class TestInMemoryProductRepository(TestCase):
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
         self.assertEqual(2, repository.add(product))
 
-    def test_list_should_list_products(self):
+    def test_list(self):
         repository = InMemoryProductRepository()
         first_product = Product(
             name='The Last of Us Part II',
@@ -64,7 +64,7 @@ class TestInMemoryProductRepository(TestCase):
         self.assertEqual(second_product.price, created_products[1].price)
         self.assertEqual(second_product.inventory_quantity, created_products[1].inventory_quantity)
 
-    def test_get_by_id_should_get_product_by_id(self):
+    def test_get_by_id(self):
         repository = InMemoryProductRepository()
         product = Product(
             name='The Last of Us Part II',
@@ -88,3 +88,17 @@ class TestInMemoryProductRepository(TestCase):
         repository = InMemoryProductRepository()
         with self.assertRaises(NotFound):
             repository.get_by_id(1)
+
+    def test_remove(self):
+        repository = InMemoryProductRepository()
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        product_id = repository.add(product)
+        repository.remove(product_id)
+        with self.assertRaises(NotFound):
+            repository.get_by_id(product_id)

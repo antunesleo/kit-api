@@ -58,3 +58,7 @@ class ProductRepository(ABC):
     @abstractmethod
     def get_by_id(self, product_id) -> Product:
         raise NotImplementedError
+
+    @abstractmethod
+    def remove(self, product_id) -> None:
+        raise NotImplementedError
