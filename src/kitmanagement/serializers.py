@@ -87,3 +87,6 @@ kit_creation_schema = {
         "kitProducts"
     ]
 }
+
+kit_update_parser = deepcopy(kit_creation_parser)
+kit_update_schema = deepcopy(kit_creation_schema)

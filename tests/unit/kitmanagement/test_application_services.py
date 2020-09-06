@@ -129,3 +129,33 @@ class TestKitService(TestCase):
 
         repository_mock.get_by_id.assert_called()
         self.assertEqual(kit_mock, kit)
+
+    def test_update_kit(self):
+        kit_update_command = {
+            'SKU': 'FASF-123',
+            'name': 'Sony Pack I',
+            'kit_products': [
+                {
+                    'product_SKU': 'AHJU-49685',
+                    'quantity': 1,
+                    'discount_percentage': 10
+                },
+                {
+                    'product_SKU': 'AHJU-49621',
+                    'quantity': 2,
+                    'discount_percentage': 15
+                }
+            ]
+        }
+        kit_mock = mock.MagicMock()
+        repository_mock = mock.MagicMock()
+        repository_mock.get_by_id.return_value = kit_mock
+
+        service = KitsService(repository_mock)
+        updated_kit = service.update_kit(1, kit_update_command)
+
+        self.assertEqual(updated_kit, kit_mock)
+        repository_mock.get_by_id.assert_called_with(1)
+        kit_products = [KitProduct(**kit_product) for kit_product in kit_update_command.pop('kit_products')]
+        kit_mock.update_infos.assert_called_with(**kit_update_command, kit_products=kit_products)
+        repository_mock.update.assert_called_with(kit_mock)

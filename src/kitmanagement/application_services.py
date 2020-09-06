@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 from src.base.application_services import ApplicationService
 from src.kitmanagement.domain import Product, Kit, KitProduct, ProductRepository, KitRepository
@@ -45,5 +46,13 @@ class KitsService(ApplicationService):
     def list_kits(self) -> List[Kit]:
         return self.__repository.list()
 
-    def get_kit(self, kit_id: int):
+    def get_kit(self, kit_id: int) -> Kit:
         return self.__repository.get_by_id(kit_id)
+
+    def update_kit(self, kit_id: int, kit_update_command: dict) -> Kit:
+        kit_update_command = deepcopy(kit_update_command)
+        kit = self.__repository.get_by_id(kit_id)
+        kit_products = [KitProduct(**kit_product) for kit_product in kit_update_command.pop('kit_products')]
+        kit.update_infos(**kit_update_command, kit_products=kit_products)
+        self.__repository.update(kit)
+        return kit

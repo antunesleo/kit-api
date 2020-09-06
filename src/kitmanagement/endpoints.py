@@ -140,6 +140,29 @@ class KitResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
+    @api.expect(api.schema_model('kit_update_command', serializers.kit_update_schema), validate=True)
+    @api.marshal_with(serializers.kit_model, code=200)
+    @api.doc(responses={
+        200: 'It works!',
+        400: 'Checkout the payload and query strings, bad parameter.',
+        404: 'The Resource doesnt exists.',
+        500: 'Sorry, this is my own fault.'
+    })
+    def put(self, kit_id: int):
+        kit_update_command = serializers.kit_update_parser.parse_args()
+        kit_update_command['kit_products'] = [
+            serializers.kit_product_parser.parse_args(
+                req=ParseResult(json=kit_product)
+            )
+            for kit_product in kit_update_command.pop('kitProducts')
+        ]
+
+        try:
+            return self.__kits_service.update_kit(kit_id, kit_update_command)
+        except NotFound:
+            api.abort(404, 'Kit Not Found.', kit_id=kit_id)
+
+
 
 def register(products_service, kits_service):
     api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})
