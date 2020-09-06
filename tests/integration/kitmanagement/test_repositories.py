@@ -102,3 +102,8 @@ class TestInMemoryProductRepository(TestCase):
         repository.remove(product_id)
         with self.assertRaises(NotFound):
             repository.get_by_id(product_id)
+
+    def test_remove_should_raise_not_found_when_cant_find_product(self):
+        repository = InMemoryProductRepository()
+        with self.assertRaises(NotFound):
+            repository.remove(1)
