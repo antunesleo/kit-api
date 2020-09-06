@@ -134,11 +134,28 @@ class CalculatedKit:
 
         return cost
 
+    @property
+    def price(self):
+        price = 0.0
+
+        for kit_product in self.__kit.kit_products:
+            product = self.__get_product_with(kit_product.product_SKU)
+            if not product:
+                continue
+
+            kit_product_price = self.__apply_discount(product.price * kit_product.quantity, kit_product.discount_percentage)
+            price += kit_product_price
+
+        return price
+
     def __get_product_with(self, SKU: str) -> Union[Product, None]:
         for product in self.__products:
             if SKU == product.SKU:
                 return product
         return None
+
+    def __apply_discount(self, price, discount_percentage):
+        return price - (price / 100 * discount_percentage)
 
 
 class ProductRepository(ABC):

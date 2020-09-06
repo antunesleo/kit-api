@@ -140,13 +140,16 @@ class TestCalculatedKit(TestCase):
         product_A_mock = mock.MagicMock()
         product_A_mock.inventory_quantity = 10
         product_A_mock.cost = 20.00
+        product_A_mock.price = 100.00
         product_A_mock.SKU = 'A'
         product_B_mock = mock.MagicMock()
         product_B_mock.inventory_quantity = 50
         product_B_mock.cost = 10.00
+        product_B_mock.price = 80.00
         product_B_mock.SKU = 'B'
         product_C_mock = mock.MagicMock()
         product_C_mock.cost = 15.00
+        product_C_mock.price = 60.00
         product_C_mock.inventory_quantity = 38
         product_C_mock.SKU = 'C'
         self.products_mock = [
@@ -158,12 +161,15 @@ class TestCalculatedKit(TestCase):
         kit_product_A_mock = mock.MagicMock()
         kit_product_A_mock.quantity = 2
         kit_product_A_mock.product_SKU = 'A'
+        kit_product_A_mock.discount_percentage = 10.00
         kit_product_B_mock = mock.MagicMock()
         kit_product_B_mock.quantity = 1
         kit_product_B_mock.product_SKU = 'B'
+        kit_product_B_mock.discount_percentage = 20.00
         kit_product_C_mock = mock.MagicMock()
         kit_product_C_mock.quantity = 5
         kit_product_C_mock.product_SKU = 'C'
+        kit_product_C_mock.discount_percentage = 15.00
         kit_products_mock = [
             kit_product_A_mock,
             kit_product_B_mock,
@@ -188,3 +194,7 @@ class TestCalculatedKit(TestCase):
     def test_cost(self):
         calculated_kit = CalculatedKit(self.kit_mock, self.products_mock)
         self.assertEqual(calculated_kit.cost, 125.00)
+
+    def test_price(self):
+        calculated_kit = CalculatedKit(self.kit_mock, self.products_mock)
+        self.assertEqual(calculated_kit.price, 499.00)
