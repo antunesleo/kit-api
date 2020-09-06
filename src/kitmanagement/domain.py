@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from src.exceptions import IdAlreadyDefined
-from src.base.domain import AggregateRoot
+from src.base.domain import AggregateRoot, ValueObject
 
 
 class Product(AggregateRoot):
@@ -52,6 +52,46 @@ class Product(AggregateRoot):
         self.__inventory_quantity = inventory_quantity
 
 
+class KitProduct(ValueObject):
+
+    def __init__(self, product_SKU: str, quantity: int, discount_percentage: float):
+        self.__product_SKU = product_SKU
+        self.__quantity = quantity
+        self.__discount_percentage = discount_percentage
+
+    @property
+    def product_SKU(self) -> str:
+        return self.__product_SKU
+
+    @property
+    def quantity(self) -> int:
+        return self.__quantity
+
+    @property
+    def discount_percentage(self) -> float:
+        return self.__discount_percentage
+
+
+class Kit(AggregateRoot):
+
+    def __init__(self, name: str, SKU: str, kit_products: List[KitProduct]):
+        self.__name = name
+        self.__SKU = SKU
+        self.__kit_products = kit_products
+
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    @property
+    def SKU(self) -> str:
+        return self.__SKU
+
+    @property
+    def kit_products(self) -> List[KitProduct]:
+        return self.__kit_products
+
+
 class ProductRepository(ABC):
 
     @abstractmethod
@@ -59,7 +99,7 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, question: Product) -> int:
+    def add(self, product: Product) -> int:
         raise NotImplementedError
 
     @abstractmethod
@@ -72,4 +112,27 @@ class ProductRepository(ABC):
 
     @abstractmethod
     def update(self, product: Product) -> None:
+        raise NotImplementedError
+
+
+class KitRepository(ABC):
+
+    @abstractmethod
+    def list(self) -> List[Kit]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def add(self, kit: Kit) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_by_id(self, kit_id: int) -> Kit:
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove(self, kit_id: int) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(self, kit: Kit) -> None:
         raise NotImplementedError
