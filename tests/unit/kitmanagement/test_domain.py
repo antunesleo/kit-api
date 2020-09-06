@@ -1,6 +1,6 @@
 from unittest import mock
 
-from src.kitmanagement.domain import Product, KitProduct, Kit
+from src.kitmanagement.domain import Product, KitProduct, Kit, CalculatedKit
 from tests.unit.base import TestCase
 
 
@@ -56,7 +56,7 @@ class TestProduct(TestCase):
 
 class TestProductKit(TestCase):
 
-    def test_product_kit_initialization_should_have_all_fields(self):
+    def test_product_kit_initialization(self):
         kit_product = KitProduct(
             product_SKU='FASD-498',
             quantity=2,
@@ -69,7 +69,7 @@ class TestProductKit(TestCase):
 
 class TestKit(TestCase):
 
-    def test_kit_initialization_shoul_have_all_fields(self):
+    def test_kit_initialization(self):
         kit_products = [
             KitProduct(
                 product_SKU='FASD-498',
@@ -132,3 +132,59 @@ class TestKit(TestCase):
         self.assertEqual(kit.SKU, 'AHJU-49685')
         self.assertEqual(kit.kit_products[0], updated_kit_products[0])
         self.assertEqual(kit.kit_products[1], updated_kit_products[1])
+
+
+class TestCalculatedKit(TestCase):
+
+    def setUp(self) -> None:
+        product_A_mock = mock.MagicMock()
+        product_A_mock.inventory_quantity = 10
+        product_A_mock.cost = 20.00
+        product_A_mock.SKU = 'A'
+        product_B_mock = mock.MagicMock()
+        product_B_mock.inventory_quantity = 50
+        product_B_mock.cost = 10.00
+        product_B_mock.SKU = 'B'
+        product_C_mock = mock.MagicMock()
+        product_C_mock.cost = 15.00
+        product_C_mock.inventory_quantity = 38
+        product_C_mock.SKU = 'C'
+        self.products_mock = [
+            product_A_mock,
+            product_B_mock,
+            product_C_mock
+        ]
+
+        kit_product_A_mock = mock.MagicMock()
+        kit_product_A_mock.quantity = 2
+        kit_product_A_mock.product_SKU = 'A'
+        kit_product_B_mock = mock.MagicMock()
+        kit_product_B_mock.quantity = 1
+        kit_product_B_mock.product_SKU = 'B'
+        kit_product_C_mock = mock.MagicMock()
+        kit_product_C_mock.quantity = 5
+        kit_product_C_mock.product_SKU = 'C'
+        kit_products_mock = [
+            kit_product_A_mock,
+            kit_product_B_mock,
+            kit_product_C_mock
+        ]
+        self.kit_mock = mock.MagicMock()
+        self.kit_mock.kit_products = kit_products_mock
+
+    def test_calculated_kit_initialization(self):
+        kit_mock = mock.MagicMock()
+        products_mock = mock.MagicMock()
+        calculated_kit = CalculatedKit(
+            kit=kit_mock,
+            products=products_mock
+        )
+        self.assertIsInstance(calculated_kit, CalculatedKit)
+
+    def test_calculate_kit_inventory_quantity(self):
+        calculated_kit = CalculatedKit(self.kit_mock, self.products_mock)
+        self.assertEqual(calculated_kit.inventory_quantity, 5)
+
+    def test_cost(self):
+        calculated_kit = CalculatedKit(self.kit_mock, self.products_mock)
+        self.assertEqual(calculated_kit.cost, 125.00)

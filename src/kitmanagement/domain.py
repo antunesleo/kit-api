@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from src.exceptions import IdAlreadyDefined
 from src.base.domain import AggregateRoot, ValueObject
@@ -93,6 +93,52 @@ class Kit(AggregateRoot):
         self.__name = name
         self.__SKU = SKU
         self.__kit_products = kit_products
+
+
+class CalculatedKit:
+
+    def __init__(self, kit: Kit, products: List[Product]):
+        self.__kit = kit
+        self.__products = products
+
+    @property
+    def inventory_quantity(self) -> int:
+        inventory_quantity = None
+
+        for kit_product in self.__kit.kit_products:
+            product = self.__get_product_with(kit_product.product_SKU)
+            if not product:
+                continue
+
+            kit_product_inventory_quantity = int(product.inventory_quantity / kit_product.quantity)
+
+            if not inventory_quantity:
+                inventory_quantity = kit_product_inventory_quantity
+                break
+
+            if kit_product_inventory_quantity < inventory_quantity:
+                inventory_quantity = kit_product_inventory_quantity
+
+        return inventory_quantity
+
+    @property
+    def cost(self) -> float:
+        cost = 0.0
+
+        for kit_product in self.__kit.kit_products:
+            product = self.__get_product_with(kit_product.product_SKU)
+            if not product:
+                continue
+
+            cost += product.cost * kit_product.quantity
+
+        return cost
+
+    def __get_product_with(self, SKU: str) -> Union[Product, None]:
+        for product in self.__products:
+            if SKU == product.SKU:
+                return product
+        return None
 
 
 class ProductRepository(ABC):
