@@ -41,3 +41,6 @@ class KitsService(ApplicationService):
         kit_id = self.__repository.add(kit)
         kit.define_id(kit_id)
         return kit
+
+    def list_kits(self) -> List[Kit]:
+        return self.__repository.list()

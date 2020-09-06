@@ -107,3 +107,14 @@ class TestKitService(TestCase):
         self.assertEqual(created_kit.kit_products[1].product_SKU, 'AHJU-49621')
         self.assertEqual(created_kit.kit_products[1].quantity, 2)
         self.assertEqual(created_kit.kit_products[1].discount_percentage, 15)
+
+    def test_list_kit(self):
+        kits_mock = mock.MagicMock()
+        repository_mock = mock.MagicMock()
+        repository_mock.list.return_value = kits_mock
+        service = KitsService(repository_mock)
+
+        kits = service.list_kits()
+
+        repository_mock.list.assert_called()
+        self.assertEqual(kits_mock, kits)

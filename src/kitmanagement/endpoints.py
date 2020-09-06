@@ -109,6 +109,14 @@ class KitsResource(ResourceBase):
         kit = self.__kits_service.create_kit(kit_creation_command)
         return kit, 201
 
+    @api.doc(responses={
+        200: 'It works!',
+        500: 'Sorry, this is my own fault.'
+    })
+    @api.marshal_list_with(serializers.kit_model, code=200)
+    def get(self):
+        return self.__kits_service.list_kits()
+
 
 def register(products_service, kits_service):
     api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})
