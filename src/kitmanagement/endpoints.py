@@ -54,6 +54,20 @@ class ProductResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Product Not Found.', product_id=product_id)
 
+    @api.expect(serializers.product_update_parser)
+    @api.marshal_with(serializers.product_model, code=200)
+    @api.doc(responses={
+        200: 'It works!',
+        500: 'Sorry, this is my own fault.'
+    })
+    def put(self, product_id):
+        try:
+            product_update_command = serializers.product_update_parser.parse_args()
+            product = self.__products_service.update_product(product_id, product_update_command)
+            return product, 200
+        except NotFound:
+            api.abort(404, 'Product Not Found.', product_id=product_id)
+
     @api.doc(responses={
         204: 'It works!',
         500: 'Sorry, this is my own fault.'

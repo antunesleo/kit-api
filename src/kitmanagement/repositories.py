@@ -37,6 +37,19 @@ class InMemoryProductRepository(ProductRepository):
 
         self.__products.pop(index_to_remove)
 
+    def update(self, product_to_update: Product) -> None:
+        index_to_remove = None
+
+        for index, product in enumerate(self.__products):
+            if product.id == product_to_update.id:
+                index_to_remove = index
+                break
+
+        if index_to_remove is None:
+            raise NotFound(f'product id: {product_to_update.id} not found')
+
+        self.__products[index_to_remove] = product_to_update
+
     def __next_id(self) -> int:
         try:
             return max(self.__products, key=lambda p: p.id).id + 1

@@ -30,3 +30,25 @@ class TestProduct(TestCase):
             inventory_quantity=150
         )
         self.assertEqual(product.id, 1)
+
+    def test_should_update_infos(self):
+        product = Product(
+            id=1,
+            name='Last of Us Part II',
+            SKU='AHJU-4968',
+            cost=2.00,
+            price=100.00,
+            inventory_quantity=100
+        )
+        product.update_infos(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        self.assertEqual(product.name, 'The Last of Us Part II')
+        self.assertEqual(product.SKU, 'AHJU-49685')
+        self.assertEqual(product.cost, 10.00)
+        self.assertEqual(product.price, 220.00)
+        self.assertEqual(product.inventory_quantity, 150)

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from flask_restx import fields, reqparse
 
 from src.web_app import get_api
@@ -19,3 +21,5 @@ product_creation_parser.add_argument('SKU', type=str, required=True, location='j
 product_creation_parser.add_argument('cost', type=float, required=True, location='json')
 product_creation_parser.add_argument('price', type=float, required=True, location='json')
 product_creation_parser.add_argument('inventoryQuantity', dest='inventory_quantity', type=int, required=True, location='json')
+
+product_update_parser = deepcopy(product_creation_parser)

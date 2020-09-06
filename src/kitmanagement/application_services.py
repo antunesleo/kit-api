@@ -17,8 +17,14 @@ class ProductsService(ApplicationService):
     def list_products(self) -> List[Product]:
         return self.__repository.list()
 
-    def get_product(self, product_id) -> Product:
+    def get_product(self, product_id: int) -> Product:
         return self.__repository.get_by_id(product_id)
 
-    def remove_product(self, product_id):
+    def remove_product(self, product_id: int):
         self.__repository.remove(product_id)
+
+    def update_product(self, product_id: int, product_update_command: dict) -> Product:
+        product = self.__repository.get_by_id(product_id)
+        product.update_infos(**product_update_command)
+        self.__repository.update(product)
+        return product

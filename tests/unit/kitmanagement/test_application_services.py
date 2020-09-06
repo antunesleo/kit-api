@@ -49,3 +49,23 @@ class TestProductsService(TestCase):
         service = ProductsService(repository_mock)
         service.remove_product(1)
         repository_mock.remove.assert_called_with(1)
+
+    def test_update_product(self):
+        product_update_command = {
+            'name': 'The Last of Us Part II',
+            'SKU': 'AHJU-49685',
+            'cost': 10.00,
+            'price': 220.00,
+            'inventory_quantity': 150
+        }
+        product_mock = mock.MagicMock()
+        repository_mock = mock.MagicMock()
+        repository_mock.get_by_id.return_value = product_mock
+
+        service = ProductsService(repository_mock)
+        updated_product = service.update_product(1, product_update_command)
+
+        self.assertEqual(updated_product, product_mock)
+        repository_mock.get_by_id.assert_called_with(1)
+        product_mock.update_infos.assert_called_with(**product_update_command)
+        repository_mock.update.assert_called_with(product_mock)

@@ -44,6 +44,13 @@ class Product(AggregateRoot):
             raise IdAlreadyDefined
         self.__id = product_id
 
+    def update_infos(self, name: str, SKU: str, cost: float, price: float, inventory_quantity: int):
+        self.__name = name
+        self.__SKU = SKU
+        self.__cost = cost
+        self.__price = price
+        self.__inventory_quantity = inventory_quantity
+
 
 class ProductRepository(ABC):
 
@@ -56,9 +63,13 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, product_id) -> Product:
+    def get_by_id(self, product_id: int) -> Product:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, product_id) -> None:
+    def remove(self, product_id: int) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(self, product: Product) -> None:
         raise NotImplementedError

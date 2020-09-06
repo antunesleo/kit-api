@@ -107,3 +107,39 @@ class TestInMemoryProductRepository(TestCase):
         repository = InMemoryProductRepository()
         with self.assertRaises(NotFound):
             repository.remove(1)
+
+    def test_update(self):
+        repository = InMemoryProductRepository()
+        product = Product(
+            name='Last of Us Part II',
+            SKU='AHJU-4968',
+            cost=2.00,
+            price=100.00,
+            inventory_quantity=100
+        )
+        product_id = repository.add(product)
+        repository.add(Product(
+            name='Bloodborne',
+            SKU='AHJU-1458',
+            cost=50.00,
+            price=200.00,
+            inventory_quantity=70
+        ))
+        product.define_id(product_id)
+
+        product.update_infos(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        repository.update(product)
+
+        product = repository.get_by_id(1)
+        self.assertEqual(product.id, 1)
+        self.assertEqual(product.name, 'The Last of Us Part II')
+        self.assertEqual(product.SKU, 'AHJU-49685')
+        self.assertEqual(product.cost, 10.00)
+        self.assertEqual(product.price, 220.00)
+        self.assertEqual(product.inventory_quantity, 150)
