@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import List
 
 from src.exceptions import IdAlreadyDefined
@@ -52,32 +53,24 @@ class Product(AggregateRoot):
         self.__inventory_quantity = inventory_quantity
 
 
+@dataclass(frozen=True)
 class KitProduct(ValueObject):
-
-    def __init__(self, product_SKU: str, quantity: int, discount_percentage: float):
-        self.__product_SKU = product_SKU
-        self.__quantity = quantity
-        self.__discount_percentage = discount_percentage
-
-    @property
-    def product_SKU(self) -> str:
-        return self.__product_SKU
-
-    @property
-    def quantity(self) -> int:
-        return self.__quantity
-
-    @property
-    def discount_percentage(self) -> float:
-        return self.__discount_percentage
+    product_SKU: str
+    quantity: int
+    discount_percentage: float
 
 
 class Kit(AggregateRoot):
 
-    def __init__(self, name: str, SKU: str, kit_products: List[KitProduct]):
+    def __init__(self, name: str, SKU: str, kit_products: List[KitProduct], id: int=None):
+        self.__id = id
         self.__name = name
         self.__SKU = SKU
         self.__kit_products = kit_products
+
+    @property
+    def id(self) -> int:
+        return self.__id
 
     @property
     def name(self) -> str:
@@ -90,6 +83,16 @@ class Kit(AggregateRoot):
     @property
     def kit_products(self) -> List[KitProduct]:
         return self.__kit_products
+
+    def define_id(self, product_id: int) -> None:
+        if self.__id:
+            raise IdAlreadyDefined
+        self.__id = product_id
+
+    def update_infos(self, name: str, SKU: str, kit_products: List[KitProduct]):
+        self.__name = name
+        self.__SKU = SKU
+        self.__kit_products = kit_products
 
 
 class ProductRepository(ABC):

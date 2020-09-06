@@ -1,6 +1,6 @@
 from src.exceptions import NotFound
-from src.kitmanagement.domain import Product
-from src.kitmanagement.repositories import InMemoryProductRepository
+from src.kitmanagement.domain import Product, Kit, KitProduct
+from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository
 from tests.integration.base import TestCase
 
 
@@ -77,7 +77,7 @@ class TestInMemoryProductRepository(TestCase):
 
         created_product = repository.get_by_id(product_id)
 
-        self.assertIsInstance(product, Product)
+        self.assertIsInstance(created_product, Product)
         self.assertEqual(product_id, created_product.id)
         self.assertEqual(product.name, created_product.name)
         self.assertEqual(product.SKU, created_product.SKU)
@@ -143,3 +143,220 @@ class TestInMemoryProductRepository(TestCase):
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
+
+
+class TestInMemoryKitRepository(TestCase):
+
+    def test_add(self):
+        repository = InMemoryKitRepository()
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+        created_kit = repository.get_by_id(kit_id)
+
+        self.assertIsInstance(kit_id, int)
+        self.assertEqual(1, kit_id)
+        self.assertEqual(1, created_kit.id)
+        self.assertEqual(kit.SKU, created_kit.SKU)
+        self.assertEqual(kit.name, created_kit.name)
+        self.assertEqual(kit.kit_products[0], created_kit.kit_products[0])
+        self.assertEqual(kit.kit_products[1], created_kit.kit_products[1])
+
+    def test_list(self):
+        repository = InMemoryKitRepository()
+
+        first_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        first_kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=first_kit_products
+        )
+        second_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=9,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1479',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        second_kit = Kit(
+            name='Sony Gaming Pack II',
+            SKU='FASD-789',
+            kit_products=second_kit_products
+        )
+        first_kit_id = repository.add(first_kit)
+        second_kit_id = repository.add(second_kit)
+
+        created_kits = repository.list()
+
+        self.assertIsInstance(created_kits, list)
+        self.assertEqual(2, len(created_kits))
+
+        self.assertEqual(first_kit_id, created_kits[0].id)
+        self.assertEqual(first_kit.SKU, created_kits[0].SKU)
+        self.assertEqual(first_kit.name, created_kits[0].name)
+        self.assertEqual(first_kit.kit_products[0], created_kits[0].kit_products[0])
+        self.assertEqual(first_kit.kit_products[1], created_kits[0].kit_products[1])
+
+        self.assertEqual(second_kit_id, created_kits[1].id)
+        self.assertEqual(second_kit.SKU, created_kits[1].SKU)
+        self.assertEqual(second_kit.name, created_kits[1].name)
+        self.assertEqual(second_kit.kit_products[0], created_kits[1].kit_products[0])
+        self.assertEqual(second_kit.kit_products[1], created_kits[1].kit_products[1])
+
+    def test_get_by_id(self):
+        repository = InMemoryKitRepository()
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+
+        created_kit = repository.get_by_id(kit_id)
+
+        self.assertIsInstance(created_kit, Kit)
+        self.assertEqual(kit_id, created_kit.id)
+        self.assertEqual(kit.name, created_kit.name)
+        self.assertEqual(kit.SKU, created_kit.SKU)
+        self.assertEqual(kit.kit_products[0], created_kit.kit_products[0])
+        self.assertEqual(kit.kit_products[1], created_kit.kit_products[1])
+
+    def test_get_by_id_should_raise_not_found_when_cant_find_kit(self):
+        repository = InMemoryProductRepository()
+        with self.assertRaises(NotFound):
+            repository.get_by_id(1)
+
+    def test_remove(self):
+        repository = InMemoryKitRepository()
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+        repository.remove(kit_id)
+        with self.assertRaises(NotFound):
+            repository.get_by_id(kit_id)
+
+    def test_remove_should_raise_not_found_when_cant_find_kit(self):
+        repository = InMemoryKitRepository()
+        with self.assertRaises(NotFound):
+            repository.remove(1)
+
+    def test_update(self):
+        repository = InMemoryKitRepository()
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+        kit.define_id(kit_id)
+
+        repository.add(Kit(
+            name='Sony Gaming Pack II',
+            SKU='FASD-789',
+            kit_products=[
+                KitProduct(
+                    product_SKU='FASD-4988',
+                    quantity=9,
+                    discount_percentage=10.5
+                ),
+                KitProduct(
+                    product_SKU='FASD-1489',
+                    quantity=1,
+                    discount_percentage=10.5
+                )
+            ]
+        ))
+
+        kit.update_infos(
+            name='Sony Gaming Pack I',
+            SKU='FASD-7879',
+            kit_products=[
+                KitProduct(
+                    product_SKU='FASD-498',
+                    quantity=7,
+                    discount_percentage=80.5
+                ),
+                KitProduct(
+                    product_SKU='FASD-1429',
+                    quantity=5,
+                    discount_percentage=72.5
+                )
+            ]
+        )
+        repository.update(kit)
+
+        kit = repository.get_by_id(1)
+        self.assertEqual(kit.name, 'Sony Gaming Pack I')
+        self.assertEqual(kit.SKU, 'FASD-7879')
+        self.assertEqual(kit.kit_products[0], kit.kit_products[0])
+        self.assertEqual(kit.kit_products[1], kit.kit_products[1])
