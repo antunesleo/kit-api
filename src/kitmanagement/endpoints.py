@@ -49,9 +49,10 @@ class ProductResource(ResourceBase):
     @api.marshal_with(serializers.product_model)
     @api.doc(responses={
         200: 'It works!',
-        500: 'Sorry, this is my own fault.'
+        500: 'Sorry, this is my own fault.',
+        404: 'The Resource doesnt exists.'
     })
-    def get(self, product_id):
+    def get(self, product_id: int):
         try:
             return self.__products_service.get_product(product_id)
         except NotFound:
@@ -61,9 +62,10 @@ class ProductResource(ResourceBase):
     @api.marshal_with(serializers.product_model, code=200)
     @api.doc(responses={
         200: 'It works!',
-        500: 'Sorry, this is my own fault.'
+        500: 'Sorry, this is my own fault.',
+        404: 'The Resource doesnt exists.'
     })
-    def put(self, product_id):
+    def put(self, product_id: int):
         try:
             product_update_command = serializers.product_update_parser.parse_args()
             product = self.__products_service.update_product(product_id, product_update_command)
@@ -73,9 +75,10 @@ class ProductResource(ResourceBase):
 
     @api.doc(responses={
         204: 'It works!',
-        500: 'Sorry, this is my own fault.'
+        500: 'Sorry, this is my own fault.',
+        404: 'The Resource doesnt exists.'
     })
-    def delete(self, product_id):
+    def delete(self, product_id: int):
         try:
             self.__products_service.remove_product(product_id)
             return {}, 204
@@ -118,7 +121,28 @@ class KitsResource(ResourceBase):
         return self.__kits_service.list_kits()
 
 
+@api.doc()
+class KitResource(ResourceBase):
+
+    def __init__(self, *args, **kwargs):
+        super(KitResource, self).__init__(*args, **kwargs)
+        self.__kits_service = kwargs['kits_service']
+
+    @api.doc(responses={
+        200: 'It works!',
+        500: 'Sorry, this is my own fault.',
+        404: 'The Resource doesnt exists.'
+    })
+    @api.marshal_with(serializers.kit_model, code=200)
+    def get(self, kit_id: int):
+        try:
+            return self.__kits_service.get_kit(kit_id)
+        except NotFound:
+            api.abort(404, 'Kit Not Found.', kit_id=kit_id)
+
+
 def register(products_service, kits_service):
     api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})
     api.add_resource(ProductsResource, '/api/products', resource_class_kwargs={'products_service': products_service})
+    api.add_resource(KitResource, '/api/kits/<int:kit_id>', resource_class_kwargs={'kits_service': kits_service})
     api.add_resource(KitsResource, '/api/kits', resource_class_kwargs={'kits_service': kits_service})

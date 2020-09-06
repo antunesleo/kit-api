@@ -118,3 +118,14 @@ class TestKitService(TestCase):
 
         repository_mock.list.assert_called()
         self.assertEqual(kits_mock, kits)
+
+    def test_get_kit(self):
+        kit_mock = mock.MagicMock()
+        repository_mock = mock.MagicMock()
+        repository_mock.get_by_id.return_value = kit_mock
+        service = KitsService(repository_mock)
+
+        kit = service.get_kit(1)
+
+        repository_mock.get_by_id.assert_called()
+        self.assertEqual(kit_mock, kit)

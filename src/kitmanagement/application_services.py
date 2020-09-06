@@ -44,3 +44,6 @@ class KitsService(ApplicationService):
 
     def list_kits(self) -> List[Kit]:
         return self.__repository.list()
+
+    def get_kit(self, kit_id: int):
+        return self.__repository.get_by_id(kit_id)
