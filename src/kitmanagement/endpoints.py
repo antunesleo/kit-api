@@ -163,7 +163,6 @@ class KitResource(ResourceBase):
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
 
-
 def register(products_service, kits_service):
     api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})
     api.add_resource(ProductsResource, '/api/products', resource_class_kwargs={'products_service': products_service})
