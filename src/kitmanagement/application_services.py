@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List
 from src.base.application_services import ApplicationService
-from src.kitmanagement.domain import Product, Kit, KitProduct, ProductRepository, KitRepository
+from src.kitmanagement.domain import Product, Kit, KitProduct, ProductRepository, KitRepository, CalculatedKit
 
 
 class ProductsService(ApplicationService):
@@ -59,3 +59,18 @@ class KitsService(ApplicationService):
 
     def remove_kit(self, kit_id):
         self.__repository.remove(kit_id)
+
+
+class CalculatedKitsService(ApplicationService):
+
+    def __init__(self, kit_repository: KitRepository, product_repository: ProductRepository):
+        self.__kit_repository = kit_repository
+        self.__product_repository = product_repository
+
+    def calculate_kit(self, kit_id: int):
+        kit = self.__kit_repository.get_by_id(kit_id)
+        products = self.__product_repository.list_with_SKUs([
+            kit_product.product_SKU
+            for kit_product in kit.kit_products
+        ])
+        return CalculatedKit(kit, products)

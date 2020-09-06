@@ -1,7 +1,7 @@
 from unittest import mock
 
-from src.kitmanagement.application_services import ProductsService, KitsService
-from src.kitmanagement.domain import Kit, KitProduct
+from src.kitmanagement.application_services import ProductsService, KitsService, CalculatedKitsService
+from src.kitmanagement.domain import Kit, KitProduct, CalculatedKit
 from tests.unit.base import TestCase
 
 
@@ -165,3 +165,31 @@ class TestKitService(TestCase):
         service = KitsService(repository_mock)
         service.remove_kit(1)
         repository_mock.remove.assert_called_with(1)
+
+
+class TestCalculatedKitsService(TestCase):
+
+    def test_get_calculated_kit(self):
+        product_A_mock = mock.MagicMock()
+        product_A_mock.inventory_quantity = 10
+        product_A_mock.cost = 20.00
+        product_A_mock.price = 100.00
+        product_A_mock.SKU = 'A'
+        products_mock = [product_A_mock]
+
+        kit_product_A_mock = mock.MagicMock()
+        kit_product_A_mock.quantity = 2
+        kit_product_A_mock.product_SKU = 'A'
+        kit_product_A_mock.discount_percentage = 10.00
+        kit_mock = mock.MagicMock()
+        kit_mock.kit_products = [kit_product_A_mock]
+
+        product_repository_mock = mock.MagicMock()
+        product_repository_mock.list_with_SKUs.return_value = products_mock
+        kit_repository_mock = mock.MagicMock()
+        kit_repository_mock.get_by_id.return_value = kit_mock
+
+        service = CalculatedKitsService(kit_repository_mock, product_repository_mock)
+        calculated_kit = service.calculate_kit(1)
+        self.assertIsInstance(calculated_kit, CalculatedKit)
+        self.assertEqual(calculated_kit.cost, 40.00)
