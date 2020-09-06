@@ -162,6 +162,18 @@ class KitResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
+    @api.doc(responses={
+        204: 'It works!',
+        500: 'Sorry, this is my own fault.',
+        404: 'The Resource doesnt exists.'
+    })
+    def delete(self, kit_id):
+        try:
+            self.__kits_service.remove_kit(kit_id)
+            return {}, 204
+        except NotFound:
+            api.abort(404, 'Kit Not Found.', kit_id=kit_id)
+
 
 def register(products_service, kits_service):
     api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})

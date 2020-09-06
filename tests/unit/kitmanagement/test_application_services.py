@@ -159,3 +159,9 @@ class TestKitService(TestCase):
         kit_products = [KitProduct(**kit_product) for kit_product in kit_update_command.pop('kit_products')]
         kit_mock.update_infos.assert_called_with(**kit_update_command, kit_products=kit_products)
         repository_mock.update.assert_called_with(kit_mock)
+
+    def test_remove_kit(self):
+        repository_mock = mock.MagicMock()
+        service = KitsService(repository_mock)
+        service.remove_kit(1)
+        repository_mock.remove.assert_called_with(1)

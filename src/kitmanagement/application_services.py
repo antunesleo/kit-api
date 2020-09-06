@@ -56,3 +56,6 @@ class KitsService(ApplicationService):
         kit.update_infos(**kit_update_command, kit_products=kit_products)
         self.__repository.update(kit)
         return kit
+
+    def remove_kit(self, kit_id):
+        self.__repository.remove(kit_id)
