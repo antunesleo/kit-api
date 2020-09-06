@@ -90,8 +90,8 @@ class KitsResource(ResourceBase):
         super(KitsResource, self).__init__(*args, **kwargs)
         self.__kits_service = kwargs['kits_service']
 
-    @api.marshal_with(serializers.kit_model, code=201)
     @api.expect(api.schema_model('kit_creation_command', serializers.kit_creation_schema), validate=True)
+    @api.marshal_with(serializers.kit_model, code=201)
     @api.doc(responses={
         201: 'It works!',
         400: 'Checkout the payload and query strings, bad parameter.',
@@ -107,7 +107,7 @@ class KitsResource(ResourceBase):
         ]
 
         kit = self.__kits_service.create_kit(kit_creation_command)
-        return {}, 201
+        return kit, 201
 
 
 def register(products_service, kits_service):

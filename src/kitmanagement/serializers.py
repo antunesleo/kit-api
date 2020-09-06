@@ -1,8 +1,6 @@
 from copy import deepcopy
-from typing import List
 
 from flask_restx import fields, reqparse
-
 from src.web_app import get_api
 
 api = get_api()
@@ -25,12 +23,17 @@ product_creation_parser.add_argument('inventoryQuantity', dest='inventory_quanti
 
 product_update_parser = deepcopy(product_creation_parser)
 
+kit_product_field = api.model('KitProduct', {
+    'productSKU': fields.String(attribute='product_SKU'),
+    'quantity': fields.Integer,
+    'discountPercentage': fields.Float(attribute='discount_percentage')
+})
 
 kit_model = api.model('Product', {
     'id': fields.Integer,
     'name': fields.String,
     'SKU': fields.String,
-    'inventoryQuantity': fields.String(attribute='inventory_quantity')
+    'kitProducts': fields.List(fields.Nested(kit_product_field), attribute='kit_products')
 })
 
 kit_product_parser = reqparse.RequestParser()
