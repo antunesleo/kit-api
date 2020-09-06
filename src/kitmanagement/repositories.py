@@ -68,7 +68,7 @@ class InMemoryKitRepository(KitRepository):
         self.__kits.append(kit)
         return kit.id
 
-    def list(self, for_read=True) -> List[Product]:
+    def list(self, for_read=True) -> List[Kit]:
         return self.__kits
 
     def get_by_id(self, kit_id) -> Kit:
