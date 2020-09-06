@@ -1,6 +1,6 @@
 from typing import List
 from src.base.application_services import ApplicationService
-from src.kitmanagement.domain import Product, ProductRepository
+from src.kitmanagement.domain import Product, Kit, KitProduct, ProductRepository, KitRepository
 
 
 class ProductsService(ApplicationService):
@@ -28,3 +28,16 @@ class ProductsService(ApplicationService):
         product.update_infos(**product_update_command)
         self.__repository.update(product)
         return product
+
+
+class KitsService(ApplicationService):
+
+    def __init__(self, repository: KitRepository):
+        self.__repository = repository
+
+    def create_kit(self, kit_creation_command: dict) -> Kit:
+        kit_products = [KitProduct(**kit_product) for kit_product in kit_creation_command.pop('kit_products')]
+        kit = Kit(**kit_creation_command, kit_products=kit_products)
+        kit_id = self.__repository.add(kit)
+        kit.define_id(kit_id)
+        return kit
