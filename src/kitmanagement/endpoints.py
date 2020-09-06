@@ -50,7 +50,18 @@ class ProductResource(ResourceBase):
     })
     def get(self, product_id):
         try:
-            return self.__products_service.get_product_by_id(product_id)
+            return self.__products_service.get_product(product_id)
+        except NotFound:
+            api.abort(404, 'Product Not Found.', product_id=product_id)
+
+    @api.doc(responses={
+        204: 'It works!',
+        500: 'Sorry, this is my own fault.'
+    })
+    def delete(self, product_id):
+        try:
+            self.__products_service.remove_product(product_id)
+            return {}, 204
         except NotFound:
             api.abort(404, 'Product Not Found.', product_id=product_id)
 

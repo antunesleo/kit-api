@@ -35,11 +35,17 @@ class TestProductsService(TestCase):
         repository_mock.list.assert_called()
         self.assertEqual(products_mock, products)
 
-    def test_get_by_id(self):
+    def test_get_product(self):
         product_mock = mock.MagicMock()
         repository_mock = mock.MagicMock()
         repository_mock.get_by_id.return_value = product_mock
         service = ProductsService(repository_mock)
-        product = service.get_product_by_id(1)
+        product = service.get_product(1)
         repository_mock.get_by_id.assert_called_with(1)
         self.assertEqual(product_mock, product)
+
+    def test_remove_product(self):
+        repository_mock = mock.MagicMock()
+        service = ProductsService(repository_mock)
+        service.remove_product(1)
+        repository_mock.remove.assert_called_with(1)
