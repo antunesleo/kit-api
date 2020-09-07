@@ -144,12 +144,12 @@ class MongoProductRepository(ProductRepository):
         self.__collection = self.__mongo_db['products']
 
     def list(self) -> List[Product]:
-        pass
+        return [self.__create_product_from_mongo(mongo_product) for mongo_product in self.__collection.find()]
 
     def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
         pass
 
-    def add(self, product: Product) -> int:
+    def add(self, product: Product) -> str:
         try:
             added_product = self.__collection.insert_one({
                 'name': product.name,
@@ -165,15 +165,7 @@ class MongoProductRepository(ProductRepository):
 
     def get_by_id(self, product_id: int) -> Product:
         mongo_product = self.__collection.find_one({'_id': ObjectId(product_id)})
-        pass
-        return Product(
-            id=str(mongo_product['_id']),
-            name=mongo_product['name'],
-            SKU=mongo_product['SKU'],
-            cost=mongo_product['cost'],
-            price=mongo_product['price'],
-            inventory_quantity=mongo_product['inventoryQuantity']
-        )
+        return self.__create_product_from_mongo(mongo_product)
 
     def get_by_SKU(self, SKU: str) -> Product:
         pass
@@ -184,3 +176,12 @@ class MongoProductRepository(ProductRepository):
     def update(self, product: Product) -> None:
         pass
 
+    def __create_product_from_mongo(self, mongo_product: dict) -> Product:
+        return Product(
+            id=str(mongo_product['_id']),
+            name=mongo_product['name'],
+            SKU=mongo_product['SKU'],
+            cost=mongo_product['cost'],
+            price=mongo_product['price'],
+            inventory_quantity=mongo_product['inventoryQuantity']
+        )

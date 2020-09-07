@@ -521,5 +521,41 @@ class TestMongoProductRepository(TestCase):
         self.assertEqual(product.price, created_product.price)
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
 
+    def test_list(self):
+        repository = MongoProductRepository(self.mongo_db)
+        first_product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        second_product = Product(
+            name='God of war',
+            SKU='AHJU-49681',
+            cost=20.00,
+            price=220.00,
+            inventory_quantity=80
+        )
+        first_product_id = repository.add(first_product)
+        second_product_id = repository.add(second_product)
+
+        created_products = repository.list()
+
+        self.assertIsInstance(created_products, list)
+        self.assertEqual(2, len(created_products))
+
+        self.assertEqual(first_product_id, created_products[0].id)
+        self.assertEqual(first_product.name, created_products[0].name)
+        self.assertEqual(first_product.SKU, created_products[0].SKU)
+        self.assertEqual(first_product.price, created_products[0].price)
+        self.assertEqual(first_product.inventory_quantity, created_products[0].inventory_quantity)
+
+        self.assertEqual(second_product_id, created_products[1].id)
+        self.assertEqual(second_product.name, created_products[1].name)
+        self.assertEqual(second_product.SKU, created_products[1].SKU)
+        self.assertEqual(second_product.price, created_products[1].price)
+        self.assertEqual(second_product.inventory_quantity, created_products[1].inventory_quantity)
+
     def tearDown(self) -> None:
         self.mongo_db.drop_collection('products')
