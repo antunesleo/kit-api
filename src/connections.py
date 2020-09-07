@@ -1,12 +1,13 @@
 """"
 This module hold all the applications connections as databases"""
-
+import pymongo
 from flask import Flask
 
+from src import configurations
 
-example1_mongo_connection = None
-example2_elastic_search_connection = None
-example3_sql_alchemy_connection = None
+config = configurations.get_config()
+mongo_client  = None
+mongo_kit_db = None
 
 
 def register(web_app: Flask) -> None:
@@ -15,6 +16,9 @@ def register(web_app: Flask) -> None:
     :param web_app:
     :return:
     '''
-    example1_mongo_connection = 'bla bla bla' # Call the function to make the connection
-    example2_elastic_search_connection = 'bla bla bla' # Call the function to make the connection
-    example3_sql_alchemy_connection = 'bla bla bla' # Call the function to make the connection
+    global mongo_client
+    global mongo_kit_db
+    mongo_client = pymongo.MongoClient(config.MONGO_HOST, config.MONGO_PORT)
+    # mongo_client = pymongo.MongoClient("mongo", 27017)
+    mongo_kit_db = mongo_client['kit']
+    mongo_kit_db.products.create_index("SKU", unique=True)

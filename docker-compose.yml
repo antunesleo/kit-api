@@ -4,6 +4,8 @@ services:
   mongo:
     image: mongo
     restart: always
+    networks:
+      - kit-network
     ports:
       - 27017:27017
     volumes:
@@ -12,6 +14,8 @@ services:
   mongo-express:
     image: mongo-express
     restart: always
+    networks:
+      - kit-network
     ports:
       - 8081:8081
 
@@ -31,7 +35,8 @@ services:
       - "8007:8007"
     networks:
       - kit-network
-
+    depends_on:
+      - mongo
 
 networks:
   kit-network:

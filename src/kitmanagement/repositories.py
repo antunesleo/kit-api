@@ -13,7 +13,7 @@ class InMemoryProductRepository(ProductRepository):
     def __init__(self):
         self.__products : List[Product] = []
 
-    def add(self, product: Product) -> int:
+    def add(self, product: Product) -> str:
         product = deepcopy(product)
         product.define_id(self.__next_id())
         self.__raise_if_SKU_already_exists(product.SKU)
@@ -23,7 +23,7 @@ class InMemoryProductRepository(ProductRepository):
     def list(self, for_read=True) -> List[Product]:
         return self.__products
 
-    def get_by_id(self, product_id: int) -> Product:
+    def get_by_id(self, product_id: str) -> Product:
         for product in self.__products:
             if product.id == product_id:
                 return product
@@ -35,7 +35,7 @@ class InMemoryProductRepository(ProductRepository):
                 return product
         raise NotFound(f'product sku: {sku} not found')
 
-    def remove(self, product_id) -> None:
+    def remove(self, product_id: str) -> None:
         index_to_remove = None
 
         for index, product in enumerate(self.__products):
@@ -64,11 +64,11 @@ class InMemoryProductRepository(ProductRepository):
     def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
         return[product for product in self.__products if product.SKU in SKUs]
 
-    def __next_id(self) -> int:
+    def __next_id(self) -> str:
         try:
-            return max(self.__products, key=lambda p: p.id).id + 1
+            return str(int(max(self.__products, key=lambda p: int(p.id)).id) + 1)
         except ValueError:
-            return 1
+            return '1'
 
     def __raise_if_SKU_already_exists(self, SKU: str) -> None:
         for product in self.__products:

@@ -9,6 +9,8 @@ class Config(object):
     TESTING = False
     DEVELOPMENT = False
     PRODUCTION = False
+    MONGO_HOST = os.environ['MONGO_HOST']
+    MONGO_PORT = int(os.environ['MONGO_PORT'])
 
 
 class ProductionConfig(Config):

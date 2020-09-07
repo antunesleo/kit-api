@@ -21,14 +21,14 @@ class TestInMemoryProductRepository(TestCase):
         product_id = repository.add(product)
         created_product = repository.get_by_id(product_id)
 
-        self.assertIsInstance(product_id, int)
-        self.assertEqual(1, product_id)
-        self.assertEqual(1, created_product.id)
+        self.assertIsInstance(product_id, str)
+        self.assertEqual('1', product_id)
+        self.assertEqual('1', created_product.id)
         self.assertEqual(product.name, created_product.name)
         self.assertEqual(product.SKU, created_product.SKU)
         self.assertEqual(product.price, created_product.price)
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
-        self.assertEqual(2, repository.add(Product(
+        self.assertEqual('2', repository.add(Product(
             name='The Last of Us Part II',
             SKU='AHJU-496851',
             cost=10.00,
@@ -49,15 +49,15 @@ class TestInMemoryProductRepository(TestCase):
         product_id = repository.add(product)
         created_product = repository.get_by_id(product_id)
 
-        self.assertIsInstance(product_id, int)
-        self.assertEqual(1, product_id)
-        self.assertEqual(1, created_product.id)
+        self.assertIsInstance(product_id, str)
+        self.assertEqual('1', product_id)
+        self.assertEqual('1', created_product.id)
         self.assertEqual(product.name, created_product.name)
         self.assertEqual(product.SKU, created_product.SKU)
         self.assertEqual(product.price, created_product.price)
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
         with self.assertRaises(SKUExistsError):
-            self.assertEqual(2, repository.add(product))
+            self.assertEqual('2', repository.add(product))
 
     def test_list(self):
         repository = InMemoryProductRepository()
@@ -211,8 +211,8 @@ class TestInMemoryProductRepository(TestCase):
         )
         repository.update(product)
 
-        product = repository.get_by_id(1)
-        self.assertEqual(product.id, 1)
+        product = repository.get_by_id('1')
+        self.assertEqual(product.id, '1')
         self.assertEqual(product.name, 'The Last of Us Part II')
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)

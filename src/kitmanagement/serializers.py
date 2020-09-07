@@ -6,7 +6,7 @@ from src.web_app import get_api
 api = get_api()
 
 product_model = api.model('Product', {
-    'id': fields.Integer,
+    'id': fields.String,
     'name': fields.String,
     'SKU': fields.String,
     'cost': fields.String,
