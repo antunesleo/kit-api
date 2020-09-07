@@ -91,11 +91,12 @@ class TestKitService(TestCase):
                 }
             ]
         }
-        repository_mock = mock.MagicMock()
-        service = KitsService(repository_mock)
+        kit_repository_mock = mock.MagicMock()
+        product_repository_mock = mock.MagicMock()
+        service = KitsService(kit_repository_mock, product_repository_mock)
         returned_kit = service.create_kit(kit_creation_command)
 
-        created_kit = repository_mock.add.mock_calls[0].args[0]
+        created_kit = kit_repository_mock.add.mock_calls[0].args[0]
         self.assertIsInstance(returned_kit, Kit)
         self.assertEqual(created_kit.SKU, 'FASF-123')
         self.assertEqual(created_kit.name, 'Sony Pack I')
@@ -110,24 +111,26 @@ class TestKitService(TestCase):
 
     def test_list_kit(self):
         kits_mock = mock.MagicMock()
-        repository_mock = mock.MagicMock()
-        repository_mock.list.return_value = kits_mock
-        service = KitsService(repository_mock)
+        product_repository_mock = mock.MagicMock()
+        kit_repository_mock = mock.MagicMock()
+        kit_repository_mock.list.return_value = kits_mock
+        service = KitsService(kit_repository_mock, product_repository_mock)
 
         kits = service.list_kits()
 
-        repository_mock.list.assert_called()
+        kit_repository_mock.list.assert_called()
         self.assertEqual(kits_mock, kits)
 
     def test_get_kit(self):
         kit_mock = mock.MagicMock()
-        repository_mock = mock.MagicMock()
-        repository_mock.get_by_id.return_value = kit_mock
-        service = KitsService(repository_mock)
+        product_repository_mock = mock.MagicMock()
+        kit_repository_mock = mock.MagicMock()
+        kit_repository_mock.get_by_id.return_value = kit_mock
+        service = KitsService(kit_repository_mock, product_repository_mock)
 
         kit = service.get_kit(1)
 
-        repository_mock.get_by_id.assert_called()
+        kit_repository_mock.get_by_id.assert_called()
         self.assertEqual(kit_mock, kit)
 
     def test_update_kit(self):
@@ -148,23 +151,25 @@ class TestKitService(TestCase):
             ]
         }
         kit_mock = mock.MagicMock()
-        repository_mock = mock.MagicMock()
-        repository_mock.get_by_id.return_value = kit_mock
+        product_repository_mock = mock.MagicMock()
+        kit_repository_mock = mock.MagicMock()
+        kit_repository_mock.get_by_id.return_value = kit_mock
 
-        service = KitsService(repository_mock)
+        service = KitsService(kit_repository_mock, product_repository_mock)
         updated_kit = service.update_kit(1, kit_update_command)
 
         self.assertEqual(updated_kit, kit_mock)
-        repository_mock.get_by_id.assert_called_with(1)
+        kit_repository_mock.get_by_id.assert_called_with(1)
         kit_products = [KitProduct(**kit_product) for kit_product in kit_update_command.pop('kit_products')]
         kit_mock.update_infos.assert_called_with(**kit_update_command, kit_products=kit_products)
-        repository_mock.update.assert_called_with(kit_mock)
+        kit_repository_mock.update.assert_called_with(kit_mock)
 
     def test_remove_kit(self):
-        repository_mock = mock.MagicMock()
-        service = KitsService(repository_mock)
+        product_repository_mock = mock.MagicMock()
+        kit_repository_mock = mock.MagicMock()
+        service = KitsService(kit_repository_mock, product_repository_mock)
         service.remove_kit(1)
-        repository_mock.remove.assert_called_with(1)
+        kit_repository_mock.remove.assert_called_with(1)
 
 
 class TestCalculatedKitsService(TestCase):

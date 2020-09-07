@@ -176,6 +176,10 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_by_SKU(self, SKU: str) -> Product:
+        raise NotImplementedError
+
+    @abstractmethod
     def remove(self, product_id: int) -> None:
         raise NotImplementedError
 

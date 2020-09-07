@@ -19,11 +19,17 @@ class InMemoryProductRepository(ProductRepository):
     def list(self, for_read=True) -> List[Product]:
         return self.__products
 
-    def get_by_id(self, product_id) -> Product:
+    def get_by_id(self, product_id: int) -> Product:
         for product in self.__products:
             if product.id == product_id:
                 return product
         raise NotFound(f'product id: {product_id} not found')
+
+    def get_by_SKU(self, sku: str) -> Product:
+        for product in self.__products:
+            if product.SKU == sku:
+                return product
+        raise NotFound(f'product sku: {sku} not found')
 
     def remove(self, product_id) -> None:
         index_to_remove = None

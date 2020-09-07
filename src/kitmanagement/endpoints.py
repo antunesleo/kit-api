@@ -78,8 +78,8 @@ class ProductResource(ResourceBase):
 
     @api.doc(responses={
         204: 'It works!',
-        500: 'Sorry, this is my own fault.',
-        404: 'The Resource doesnt exists.'
+        404: 'The Resource doesnt exists.',
+        500: 'Sorry, this is my own fault.'
     })
     def delete(self, product_id: int):
         try:
@@ -101,6 +101,7 @@ class KitsResource(ResourceBase):
     @api.doc(responses={
         201: 'It works!',
         400: 'Checkout the payload and query strings, bad parameter.',
+        404: 'The Resource doesnt exists.',
         500: 'Sorry, this is my own fault.'
     })
     def post(self):
@@ -115,6 +116,8 @@ class KitsResource(ResourceBase):
         try:
             kit = self.__kits_service.create_kit(kit_creation_command)
             return kit, 201
+        except NotFound:
+            api.abort(404, 'Product Not Found.')
         except SKUExistsError:
             api.abort(400, 'The kit SKU is already being used by another kit ', SKU=kit_creation_command['SKU'])
 
