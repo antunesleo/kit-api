@@ -91,6 +91,7 @@ kit_creation_schema = {
 
 kit_update_parser = deepcopy(kit_creation_parser)
 kit_update_parser.remove_argument('SKU')
+# TODO: Remove SKU from update
 kit_update_schema = deepcopy(kit_creation_schema)
 kit_update_schema['properties'].pop('SKU')
 
