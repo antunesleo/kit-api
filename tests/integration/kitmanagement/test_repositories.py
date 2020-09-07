@@ -1,9 +1,13 @@
 import pymongo
 
+from src import configurations
 from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import Product, Kit, KitProduct
 from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository, MongoProductRepository
 from tests.integration.base import TestCase
+
+
+config = configurations.get_config()
 
 
 class TestInMemoryProductRepository(TestCase):
@@ -460,7 +464,7 @@ class TestInMemoryKitRepository(TestCase):
 class TestMongoProductRepository(TestCase):
 
     def setUp(self) -> None:
-        self.mongo_client = pymongo.MongoClient()
+        self.mongo_client = pymongo.MongoClient(config.MONGO_HOST, config.MONGO_PORT)
         self.mongo_db = self.mongo_client['test-database']
         self.mongo_db.products.create_index("SKU", unique=True)
 
