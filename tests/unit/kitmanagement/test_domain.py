@@ -42,13 +42,11 @@ class TestProduct(TestCase):
         )
         product.update_infos(
             name='The Last of Us Part II',
-            SKU='AHJU-49685',
             cost=10.00,
             price=220.00,
             inventory_quantity=150
         )
         self.assertEqual(product.name, 'The Last of Us Part II')
-        self.assertEqual(product.SKU, 'AHJU-49685')
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
@@ -124,12 +122,10 @@ class TestKit(TestCase):
         ]
         kit.update_infos(
             name='Sony Gaming Pack I',
-            SKU='AHJU-49685',
             kit_products=updated_kit_products
         )
 
         self.assertEqual(kit.name, 'Sony Gaming Pack I')
-        self.assertEqual(kit.SKU, 'AHJU-49685')
         self.assertEqual(kit.kit_products[0], updated_kit_products[0])
         self.assertEqual(kit.kit_products[1], updated_kit_products[1])
 

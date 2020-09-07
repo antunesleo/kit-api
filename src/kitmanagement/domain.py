@@ -45,9 +45,8 @@ class Product(AggregateRoot):
             raise IdAlreadyDefined
         self.__id = product_id
 
-    def update_infos(self, name: str, SKU: str, cost: float, price: float, inventory_quantity: int):
+    def update_infos(self, name: str, cost: float, price: float, inventory_quantity: int):
         self.__name = name
-        self.__SKU = SKU
         self.__cost = cost
         self.__price = price
         self.__inventory_quantity = inventory_quantity
@@ -89,9 +88,8 @@ class Kit(AggregateRoot):
             raise IdAlreadyDefined
         self.__id = product_id
 
-    def update_infos(self, name: str, SKU: str, kit_products: List[KitProduct]):
+    def update_infos(self, name: str, kit_products: List[KitProduct]):
         self.__name = name
-        self.__SKU = SKU
         self.__kit_products = kit_products
 
 

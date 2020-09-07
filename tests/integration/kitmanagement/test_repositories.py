@@ -203,7 +203,6 @@ class TestInMemoryProductRepository(TestCase):
 
         product.update_infos(
             name='The Last of Us Part II',
-            SKU='AHJU-49685',
             cost=10.00,
             price=220.00,
             inventory_quantity=150
@@ -213,7 +212,6 @@ class TestInMemoryProductRepository(TestCase):
         product = repository.get_by_id(1)
         self.assertEqual(product.id, 1)
         self.assertEqual(product.name, 'The Last of Us Part II')
-        self.assertEqual(product.SKU, 'AHJU-49685')
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
@@ -436,7 +434,6 @@ class TestInMemoryKitRepository(TestCase):
 
         kit.update_infos(
             name='Sony Gaming Pack I',
-            SKU='FASD-7879',
             kit_products=[
                 KitProduct(
                     product_SKU='FASD-498',
@@ -454,6 +451,5 @@ class TestInMemoryKitRepository(TestCase):
 
         kit = repository.get_by_id(1)
         self.assertEqual(kit.name, 'Sony Gaming Pack I')
-        self.assertEqual(kit.SKU, 'FASD-7879')
         self.assertEqual(kit.kit_products[0], kit.kit_products[0])
         self.assertEqual(kit.kit_products[1], kit.kit_products[1])

@@ -22,6 +22,7 @@ product_creation_parser.add_argument('price', type=float, required=True, locatio
 product_creation_parser.add_argument('inventoryQuantity', dest='inventory_quantity', type=int, required=True, location='json')
 
 product_update_parser = deepcopy(product_creation_parser)
+product_update_parser.remove_argument('SKU')
 
 kit_product_field = api.model('KitProduct', {
     'productSKU': fields.String(attribute='product_SKU'),
@@ -89,12 +90,15 @@ kit_creation_schema = {
 }
 
 kit_update_parser = deepcopy(kit_creation_parser)
+kit_update_parser.remove_argument('SKU')
 kit_update_schema = deepcopy(kit_creation_schema)
+kit_update_schema['properties'].pop('SKU')
+
 
 calculated_kit_model = api.model('CalculatedKit', {
     'name': fields.String,
     'SKU': fields.String,
-    'cost': fields.String,
-    'price': fields.String,
-    'inventoryQuantity': fields.String(attribute='inventory_quantity')
+    'cost': fields.Float,
+    'price': fields.Float,
+    'inventoryQuantity': fields.Integer(attribute='inventory_quantity')
 })
