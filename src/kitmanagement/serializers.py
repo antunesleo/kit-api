@@ -31,7 +31,7 @@ kit_product_field = api.model('KitProduct', {
 })
 
 kit_model = api.model('Product', {
-    'id': fields.Integer,
+    'id': fields.String,
     'name': fields.String,
     'SKU': fields.String,
     'kitProducts': fields.List(fields.Nested(kit_product_field), attribute='kit_products')
