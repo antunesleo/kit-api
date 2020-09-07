@@ -61,14 +61,14 @@ class KitProduct(ValueObject):
 
 class Kit(AggregateRoot):
 
-    def __init__(self, name: str, SKU: str, kit_products: List[KitProduct], id: int=None):
+    def __init__(self, name: str, SKU: str, kit_products: List[KitProduct], id: str=None):
         self.__id = id
         self.__name = name
         self.__SKU = SKU
         self.__kit_products = kit_products
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         return self.__id
 
     @property
@@ -193,15 +193,15 @@ class KitRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, kit: Kit) -> int:
+    def add(self, kit: Kit) -> Union[str, int]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, kit_id: int) -> Kit:
+    def get_by_id(self, kit_id: Union[str, int]) -> Kit:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, kit_id: int) -> None:
+    def remove(self, kit_id: Union[str, int]) -> None:
         raise NotImplementedError
 
     @abstractmethod

@@ -1,11 +1,11 @@
 from copy import deepcopy
-from typing import List
+from typing import List, Union
 
 from bson.objectid import ObjectId
 from pymongo.errors import DuplicateKeyError
 
 from src.exceptions import NotFound, SKUExistsError
-from src.kitmanagement.domain import ProductRepository, KitRepository, Kit, Product
+from src.kitmanagement.domain import ProductRepository, KitRepository, Kit, Product, KitProduct
 
 
 class InMemoryProductRepository(ProductRepository):
@@ -124,11 +124,11 @@ class InMemoryKitRepository(KitRepository):
 
         self.__kits[index_to_update] = kit_to_update
 
-    def __next_id(self) -> int:
+    def __next_id(self) -> str:
         try:
-            return max(self.__kits, key=lambda k: k.id).id + 1
+            return str(int(max(self.__kits, key=lambda k: int(k.id)).id) + 1)
         except ValueError:
-            return 1
+            return '1'
 
     def __raise_if_SKU_already_exists(self, SKU: str) -> None:
         for kit in self.__kits:
@@ -168,6 +168,8 @@ class MongoProductRepository(ProductRepository):
 
     def get_by_SKU(self, SKU: str) -> Product:
         mongo_product = self.__collection.find_one({'SKU': SKU})
+        if not mongo_product:
+            raise NotFound(f'product SKU: {SKU} not found')
         return self.__create_product_from_mongo(mongo_product)
 
     def remove(self, product_id: str) -> None:
@@ -201,4 +203,74 @@ class MongoProductRepository(ProductRepository):
             'cost': product.cost,
             'price': product.price,
             'inventoryQuantity': product.inventory_quantity
+        }
+
+
+class MongoKitRepository(KitRepository):
+
+    def __init__(self, mongo_db):
+        self.__mongo_db = mongo_db
+        self.__collection = self.__mongo_db['kits']
+
+    def list(self) -> List[Kit]:
+        return [self.__create_kit_from_mongo(mongo_product) for mongo_product in self.__collection.find()]
+
+    def add(self, kit: Kit) -> str:
+        try:
+            added_kit = self.__collection.insert_one(self.__create_mongo_kit_from_kit(kit))
+        except DuplicateKeyError:
+            raise SKUExistsError('you must provide an unique SKU')
+
+        return str(added_kit.inserted_id)
+
+    def get_by_id(self, kit_id: str) -> Kit:
+        mongo_product = self.__collection.find_one({'_id': ObjectId(kit_id)})
+        if not mongo_product:
+            raise NotFound(f'kit id: {kit_id} not found')
+        return self.__create_kit_from_mongo(mongo_product)
+
+    def remove(self, kit_id: str) -> None:
+        result = self.__collection.delete_one({'_id': ObjectId(kit_id)})
+        if result.deleted_count < 1:
+            raise NotFound(f'kit id: {kit_id} not found')
+
+    def update(self, kit: Kit) -> None:
+        kit_mongo = self.__create_mongo_kit_from_kit(kit)
+        result = self.__collection.update_one(
+            {'_id': ObjectId(kit.id)},
+            {'$set': kit_mongo}
+        )
+        if result.matched_count < 1:
+            raise NotFound(f'product id: {kit.id} not found')
+
+    @staticmethod
+    def __create_kit_from_mongo(kit_mongo: dict) -> Kit:
+        kit_products = [
+            KitProduct(
+                product_SKU=kit_product_mongo['productSKU'],
+                quantity=kit_product_mongo['quantity'],
+                discount_percentage=kit_product_mongo['discountPercentage']
+            )
+            for kit_product_mongo in kit_mongo.pop('kit_products')
+        ]
+        return Kit(
+            id=str(kit_mongo['_id']),
+            name=kit_mongo['name'],
+            SKU=kit_mongo['SKU'],
+            kit_products=kit_products
+        )
+
+    def __create_mongo_kit_from_kit(self, kit: Kit) -> dict:
+        kit_products_mongo = [
+            {
+                'productSKU': kit_product.product_SKU,
+                'quantity': kit_product.quantity,
+                'discountPercentage': kit_product.discount_percentage
+            }
+            for kit_product in kit.kit_products
+        ]
+        return {
+            'name': kit.name,
+            'SKU': kit.SKU,
+            'kit_products': kit_products_mongo
         }

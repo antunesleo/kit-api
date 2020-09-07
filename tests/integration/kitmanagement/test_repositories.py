@@ -3,7 +3,7 @@ import pymongo
 from src import configurations
 from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import Product, Kit, KitProduct
-from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository, MongoProductRepository
+from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository, MongoProductRepository, MongoKitRepository
 from tests.integration.base import TestCase
 
 
@@ -247,9 +247,9 @@ class TestInMemoryKitRepository(TestCase):
         kit_id = repository.add(kit)
         created_kit = repository.get_by_id(kit_id)
 
-        self.assertIsInstance(kit_id, int)
-        self.assertEqual(1, kit_id)
-        self.assertEqual(1, created_kit.id)
+        self.assertIsInstance(kit_id, str)
+        self.assertEqual('1', kit_id)
+        self.assertEqual('1', created_kit.id)
         self.assertEqual(kit.SKU, created_kit.SKU)
         self.assertEqual(kit.name, created_kit.name)
         self.assertEqual(kit.kit_products[0], created_kit.kit_products[0])
@@ -368,7 +368,7 @@ class TestInMemoryKitRepository(TestCase):
     def test_get_by_id_should_raise_not_found_when_cant_find_kit(self):
         repository = InMemoryProductRepository()
         with self.assertRaises(NotFound):
-            repository.get_by_id(1)
+            repository.get_by_id('1')
 
     def test_remove(self):
         repository = InMemoryKitRepository()
@@ -455,7 +455,7 @@ class TestInMemoryKitRepository(TestCase):
         )
         repository.update(kit)
 
-        kit = repository.get_by_id(1)
+        kit = repository.get_by_id('1')
         self.assertEqual(kit.name, 'Sony Gaming Pack I')
         self.assertEqual(kit.kit_products[0], kit.kit_products[0])
         self.assertEqual(kit.kit_products[1], kit.kit_products[1])
@@ -702,3 +702,271 @@ class TestMongoProductRepository(TestCase):
 
     def tearDown(self) -> None:
         self.mongo_db.drop_collection('products')
+
+
+class TestMongoKitRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.mongo_client = pymongo.MongoClient(config.MONGO_HOST, config.MONGO_PORT)
+        self.mongo_db = self.mongo_client['test-database']
+        self.mongo_db.kits.create_index("SKU", unique=True)
+
+    def test_add(self):
+        repository = MongoKitRepository(self.mongo_db)
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+        created_kit = repository.get_by_id(kit_id)
+
+        self.assertIsInstance(kit_id, str)
+        self.assertEqual(kit_id, created_kit.id)
+        self.assertEqual(kit.SKU, created_kit.SKU)
+        self.assertEqual(kit.name, created_kit.name)
+        self.assertEqual(kit.kit_products[0], created_kit.kit_products[0])
+        self.assertEqual(kit.kit_products[1], created_kit.kit_products[1])
+
+    def test_add_should_raise_SKUExistsError_when_another_kit_has_the_same_SKU(self):
+        repository = MongoKitRepository(self.mongo_db)
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        repository.add(kit)
+        with self.assertRaises(SKUExistsError):
+            repository.add(kit)
+
+    def test_list(self):
+        repository = MongoKitRepository(self.mongo_db)
+
+        first_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-14891',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        first_kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=first_kit_products
+        )
+        second_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=9,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1479',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        second_kit = Kit(
+            name='Sony Gaming Pack II',
+            SKU='FASD-7894',
+            kit_products=second_kit_products
+        )
+        first_kit_id = repository.add(first_kit)
+        second_kit_id = repository.add(second_kit)
+
+        created_kits = repository.list()
+
+        self.assertIsInstance(created_kits, list)
+        self.assertEqual(2, len(created_kits))
+
+        self.assertEqual(first_kit_id, created_kits[0].id)
+        self.assertEqual(first_kit.SKU, created_kits[0].SKU)
+        self.assertEqual(first_kit.name, created_kits[0].name)
+        self.assertEqual(first_kit.kit_products[0], created_kits[0].kit_products[0])
+        self.assertEqual(first_kit.kit_products[1], created_kits[0].kit_products[1])
+
+        self.assertEqual(second_kit_id, created_kits[1].id)
+        self.assertEqual(second_kit.SKU, created_kits[1].SKU)
+        self.assertEqual(second_kit.name, created_kits[1].name)
+        self.assertEqual(second_kit.kit_products[0], created_kits[1].kit_products[0])
+        self.assertEqual(second_kit.kit_products[1], created_kits[1].kit_products[1])
+
+    def test_get_by_id(self):
+        repository = InMemoryKitRepository()
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+
+        created_kit = repository.get_by_id(kit_id)
+
+        self.assertIsInstance(created_kit, Kit)
+        self.assertEqual(kit_id, created_kit.id)
+        self.assertEqual(kit.name, created_kit.name)
+        self.assertEqual(kit.SKU, created_kit.SKU)
+        self.assertEqual(kit.kit_products[0], created_kit.kit_products[0])
+        self.assertEqual(kit.kit_products[1], created_kit.kit_products[1])
+
+    def test_get_by_id_should_raise_not_found_when_cant_find_kit(self):
+        repository = MongoKitRepository(self.mongo_db)
+        with self.assertRaises(NotFound):
+            repository.get_by_id('5f566e9c1022bd08188d674b')
+
+    def test_remove(self):
+        repository = MongoKitRepository(self.mongo_db)
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+        repository.remove(kit_id)
+        with self.assertRaises(NotFound):
+            repository.get_by_id(kit_id)
+
+    def test_remove_should_raise_not_found_when_cant_find_kit(self):
+        repository = MongoKitRepository(self.mongo_db)
+        with self.assertRaises(NotFound):
+            repository.remove('5f566e9c1022bd08188d674b')
+
+    def test_update(self):
+        repository = MongoKitRepository(self.mongo_db)
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        kit_id = repository.add(kit)
+        kit.define_id(kit_id)
+
+        repository.add(Kit(
+            name='Sony Gaming Pack II',
+            SKU='FASD-7894',
+            kit_products=[
+                KitProduct(
+                    product_SKU='FASD-4988',
+                    quantity=9,
+                    discount_percentage=10.5
+                ),
+                KitProduct(
+                    product_SKU='FASD-1489',
+                    quantity=1,
+                    discount_percentage=10.5
+                )
+            ]
+        ))
+
+        kit.update_infos(
+            name='Sony Gaming Pack I',
+            kit_products=[
+                KitProduct(
+                    product_SKU='FASD-498',
+                    quantity=7,
+                    discount_percentage=80.5
+                ),
+                KitProduct(
+                    product_SKU='FASD-1429',
+                    quantity=5,
+                    discount_percentage=72.5
+                )
+            ]
+        )
+        repository.update(kit)
+
+        kit = repository.get_by_id(kit_id)
+        self.assertEqual(kit.name, 'Sony Gaming Pack I')
+        self.assertEqual(kit.kit_products[0], kit.kit_products[0])
+        self.assertEqual(kit.kit_products[1], kit.kit_products[1])
+
+    def test_update_should_raise_not_found_when_cant_find_product(self):
+        repository = MongoKitRepository(self.mongo_db)
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            id='5f566e9c1022bd08188d674b',
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        with self.assertRaises(NotFound):
+            repository.update(kit)
+
+    def tearDown(self) -> None:
+        self.mongo_db.drop_collection('kits')
