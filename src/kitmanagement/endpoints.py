@@ -1,7 +1,7 @@
 from flask import request
 from flask_restx.reqparse import ParseResult
 
-from src.exceptions import NotFound
+from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import Product
 from src.web_app import get_api
 
@@ -36,8 +36,11 @@ class ProductsResource(ResourceBase):
     })
     def post(self):
         product_creation_command = serializers.product_creation_parser.parse_args()
-        product = self.__products_service.create_product(product_creation_command)
-        return product, 201
+        try:
+            product = self.__products_service.create_product(product_creation_command)
+            return product, 201
+        except SKUExistsError:
+            api.abort(400, 'The product SKU is already being used by another product', SKU=product_creation_command['SKU'])
 
 
 class ProductResource(ResourceBase):
@@ -109,8 +112,11 @@ class KitsResource(ResourceBase):
             for kit_product in kit_creation_command.pop('kitProducts')
         ]
 
-        kit = self.__kits_service.create_kit(kit_creation_command)
-        return kit, 201
+        try:
+            kit = self.__kits_service.create_kit(kit_creation_command)
+            return kit, 201
+        except SKUExistsError:
+            api.abort(400, 'The kit SKU is already being used by another kit ', SKU=kit_creation_command['SKU'])
 
     @api.doc(responses={
         200: 'It works!',

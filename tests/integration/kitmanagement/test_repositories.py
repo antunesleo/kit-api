@@ -1,4 +1,4 @@
-from src.exceptions import NotFound
+from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import Product, Kit, KitProduct
 from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository
 from tests.integration.base import TestCase
@@ -26,7 +26,36 @@ class TestInMemoryProductRepository(TestCase):
         self.assertEqual(product.SKU, created_product.SKU)
         self.assertEqual(product.price, created_product.price)
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
-        self.assertEqual(2, repository.add(product))
+        self.assertEqual(2, repository.add(Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-496851',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )))
+
+    def test_add_should_raise_SKUExistsError_when_another_product_has_the_same_SKU(self):
+        repository = InMemoryProductRepository()
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+
+        product_id = repository.add(product)
+        created_product = repository.get_by_id(product_id)
+
+        self.assertIsInstance(product_id, int)
+        self.assertEqual(1, product_id)
+        self.assertEqual(1, created_product.id)
+        self.assertEqual(product.name, created_product.name)
+        self.assertEqual(product.SKU, created_product.SKU)
+        self.assertEqual(product.price, created_product.price)
+        self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
+        with self.assertRaises(SKUExistsError):
+            self.assertEqual(2, repository.add(product))
 
     def test_list(self):
         repository = InMemoryProductRepository()
@@ -39,7 +68,7 @@ class TestInMemoryProductRepository(TestCase):
         )
         second_product = Product(
             name='God of war',
-            SKU='AHJU-49685',
+            SKU='AHJU-49681',
             cost=20.00,
             price=220.00,
             inventory_quantity=80
@@ -222,6 +251,29 @@ class TestInMemoryKitRepository(TestCase):
         self.assertEqual(kit.kit_products[0], created_kit.kit_products[0])
         self.assertEqual(kit.kit_products[1], created_kit.kit_products[1])
 
+    def test_add_should_raise_SKUExistsError_when_another_kit_has_the_same_SKU(self):
+        repository = InMemoryKitRepository()
+        kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1489',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=kit_products
+        )
+        repository.add(kit)
+        with self.assertRaises(SKUExistsError):
+            repository.add(kit)
+
     def test_list(self):
         repository = InMemoryKitRepository()
 
@@ -232,7 +284,7 @@ class TestInMemoryKitRepository(TestCase):
                 discount_percentage=10.5
             ),
             KitProduct(
-                product_SKU='FASD-1489',
+                product_SKU='FASD-14891',
                 quantity=1,
                 discount_percentage=10.5
             )
@@ -256,7 +308,7 @@ class TestInMemoryKitRepository(TestCase):
         ]
         second_kit = Kit(
             name='Sony Gaming Pack II',
-            SKU='FASD-789',
+            SKU='FASD-7894',
             kit_products=second_kit_products
         )
         first_kit_id = repository.add(first_kit)
@@ -367,7 +419,7 @@ class TestInMemoryKitRepository(TestCase):
 
         repository.add(Kit(
             name='Sony Gaming Pack II',
-            SKU='FASD-789',
+            SKU='FASD-7894',
             kit_products=[
                 KitProduct(
                     product_SKU='FASD-4988',

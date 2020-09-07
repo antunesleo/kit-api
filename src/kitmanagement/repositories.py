@@ -1,6 +1,6 @@
 from copy import deepcopy
 from typing import List
-from src.exceptions import NotFound
+from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import ProductRepository, KitRepository, Kit, Product
 
 
@@ -12,6 +12,7 @@ class InMemoryProductRepository(ProductRepository):
     def add(self, product: Product) -> int:
         product = deepcopy(product)
         product.define_id(self.__next_id())
+        self.__raise_if_SKU_already_exists(product.SKU)
         self.__products.append(product)
         return product.id
 
@@ -59,6 +60,12 @@ class InMemoryProductRepository(ProductRepository):
         except ValueError:
             return 1
 
+    def __raise_if_SKU_already_exists(self, SKU: str) -> None:
+        for product in self.__products:
+            if product.SKU == SKU:
+                raise SKUExistsError('you must provide an unique SKU')
+        return None
+
 
 class InMemoryKitRepository(KitRepository):
 
@@ -68,6 +75,7 @@ class InMemoryKitRepository(KitRepository):
     def add(self, kit: Kit) -> int:
         kit = deepcopy(kit)
         kit.define_id(self.__next_id())
+        self.__raise_if_SKU_already_exists(kit.SKU)
         self.__kits.append(kit)
         return kit.id
 
@@ -111,3 +119,9 @@ class InMemoryKitRepository(KitRepository):
             return max(self.__kits, key=lambda k: k.id).id + 1
         except ValueError:
             return 1
+
+    def __raise_if_SKU_already_exists(self, SKU: str) -> None:
+        for kit in self.__kits:
+            if kit.SKU == SKU:
+                raise SKUExistsError('you must provide an unique SKU')
+        return None

@@ -8,3 +8,7 @@ class ConfigClassNotFound(Exception):
 
 class IdAlreadyDefined(Exception):
     pass
+
+
+class SKUExistsError(Exception):
+    pass
