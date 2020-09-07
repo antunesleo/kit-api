@@ -115,9 +115,6 @@ class CalculatedKit:
 
         for kit_product in self.__kit.kit_products:
             product = self.__get_product_with(kit_product.product_SKU)
-            if not product:
-                continue
-
             kit_product_inventory_quantity = int(product.inventory_quantity / kit_product.quantity)
 
             if not inventory_quantity:
@@ -135,9 +132,6 @@ class CalculatedKit:
 
         for kit_product in self.__kit.kit_products:
             product = self.__get_product_with(kit_product.product_SKU)
-            if not product:
-                continue
-
             cost += product.cost * kit_product.quantity
 
         return cost
@@ -148,19 +142,16 @@ class CalculatedKit:
 
         for kit_product in self.__kit.kit_products:
             product = self.__get_product_with(kit_product.product_SKU)
-            if not product:
-                continue
-
             kit_product_price = self.__apply_discount(product.price * kit_product.quantity, kit_product.discount_percentage)
             price += kit_product_price
 
         return price
 
-    def __get_product_with(self, SKU: str) -> Union[Product, None]:
+    def __get_product_with(self, SKU: str) -> Product:
         for product in self.__products:
             if SKU == product.SKU:
                 return product
-        return None
+        raise ValueError('Must have one product for each kit.kit_product')
 
     def __apply_discount(self, price, discount_percentage):
         return price - (price / 100 * discount_percentage)
