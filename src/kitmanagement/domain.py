@@ -8,7 +8,7 @@ from src.base.domain import AggregateRoot, ValueObject
 
 class Product(AggregateRoot):
 
-    def __init__(self, name: str, SKU: str, cost: float, price: float, inventory_quantity: int, id: int=None):
+    def __init__(self, name: str, SKU: str, cost: float, price: float, inventory_quantity: int, id: Union[int, str]=None):
         self.__id = id
         self.__name = name
         self.__SKU = SKU
@@ -166,11 +166,11 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, product: Product) -> int:
+    def add(self, product: Product) -> Union[int, str]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, product_id: int) -> Product:
+    def get_by_id(self, product_id: Union[int, str]) -> Product:
         raise NotImplementedError
 
     @abstractmethod
@@ -178,7 +178,7 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, product_id: int) -> None:
+    def remove(self, product_id: Union[int, str]) -> None:
         raise NotImplementedError
 
     @abstractmethod

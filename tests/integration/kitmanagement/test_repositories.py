@@ -1,6 +1,8 @@
+import pymongo
+
 from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import Product, Kit, KitProduct
-from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository
+from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository, MongoProductRepository
 from tests.integration.base import TestCase
 
 
@@ -453,3 +455,71 @@ class TestInMemoryKitRepository(TestCase):
         self.assertEqual(kit.name, 'Sony Gaming Pack I')
         self.assertEqual(kit.kit_products[0], kit.kit_products[0])
         self.assertEqual(kit.kit_products[1], kit.kit_products[1])
+
+
+class TestMongoProductRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.mongo_client = pymongo.MongoClient()
+        self.mongo_db = self.mongo_client['test-database']
+        self.mongo_db.products.create_index("SKU", unique=True)
+
+    def test_add(self):
+        repository = MongoProductRepository(self.mongo_db)
+
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+
+        product_id = repository.add(product)
+        created_product = repository.get_by_id(product_id)
+
+        self.assertIsInstance(product_id, str)
+        self.assertEqual(product_id, created_product.id)
+        self.assertEqual(product.name, created_product.name)
+        self.assertEqual(product.SKU, created_product.SKU)
+        self.assertEqual(product.price, created_product.price)
+        self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
+
+    def test_add_should_raise_SKUExistsError_when_another_product_has_the_same_SKU(self):
+        repository = MongoProductRepository(self.mongo_db)
+
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+
+        repository.add(product)
+
+        with self.assertRaises(SKUExistsError):
+            repository.add(product)
+
+    def test_get_by_id(self):
+        repository = MongoProductRepository(self.mongo_db)
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        product_id = repository.add(product)
+
+        created_product = repository.get_by_id(product_id)
+
+        self.assertIsInstance(created_product, Product)
+        self.assertEqual(product_id, created_product.id)
+        self.assertEqual(product.name, created_product.name)
+        self.assertEqual(product.SKU, created_product.SKU)
+        self.assertEqual(product.price, created_product.price)
+        self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
+
+    def tearDown(self) -> None:
+        self.mongo_db.drop_collection('products')

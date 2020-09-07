@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask
-from flask_restx import Api
+from flask_restx import Api, Model
 
 from src import configurations
 

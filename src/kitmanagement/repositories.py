@@ -1,5 +1,9 @@
 from copy import deepcopy
 from typing import List
+
+from bson.objectid import ObjectId
+from pymongo.errors import DuplicateKeyError
+
 from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import ProductRepository, KitRepository, Kit, Product
 
@@ -131,3 +135,52 @@ class InMemoryKitRepository(KitRepository):
             if kit.SKU == SKU:
                 raise SKUExistsError('you must provide an unique SKU')
         return None
+
+
+class MongoProductRepository(ProductRepository):
+
+    def __init__(self, mongo_db):
+        self.__mongo_db = mongo_db
+        self.__collection = self.__mongo_db['products']
+
+    def list(self) -> List[Product]:
+        pass
+
+    def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
+        pass
+
+    def add(self, product: Product) -> int:
+        try:
+            added_product = self.__collection.insert_one({
+                'name': product.name,
+                'SKU': product.SKU,
+                'cost': product.cost,
+                'price': product.price,
+                'inventoryQuantity': product.inventory_quantity
+            })
+        except DuplicateKeyError:
+            raise SKUExistsError('you must provide an unique SKU')
+
+        return str(added_product.inserted_id)
+
+    def get_by_id(self, product_id: int) -> Product:
+        mongo_product = self.__collection.find_one({'_id': ObjectId(product_id)})
+        pass
+        return Product(
+            id=str(mongo_product['_id']),
+            name=mongo_product['name'],
+            SKU=mongo_product['SKU'],
+            cost=mongo_product['cost'],
+            price=mongo_product['price'],
+            inventory_quantity=mongo_product['inventoryQuantity']
+        )
+
+    def get_by_SKU(self, SKU: str) -> Product:
+        pass
+
+    def remove(self, product_id: int) -> None:
+        pass
+
+    def update(self, product: Product) -> None:
+        pass
+
