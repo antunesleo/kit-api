@@ -147,7 +147,10 @@ class MongoProductRepository(ProductRepository):
         return [self.__create_product_from_mongo(mongo_product) for mongo_product in self.__collection.find()]
 
     def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
-        pass
+        return [
+            self.__create_product_from_mongo(mongo_product)
+            for mongo_product in self.__collection.find({'SKU': {'$in': SKUs}}).sort('_id')
+        ]
 
     def add(self, product: Product) -> str:
         try:
