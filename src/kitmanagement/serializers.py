@@ -90,3 +90,11 @@ kit_creation_schema = {
 
 kit_update_parser = deepcopy(kit_creation_parser)
 kit_update_schema = deepcopy(kit_creation_schema)
+
+calculated_kit_model = api.model('CalculatedKit', {
+    'name': fields.String,
+    'SKU': fields.String,
+    'cost': fields.String,
+    'price': fields.String,
+    'inventoryQuantity': fields.String(attribute='inventory_quantity')
+})

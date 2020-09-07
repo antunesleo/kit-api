@@ -102,6 +102,14 @@ class CalculatedKit:
         self.__products = products
 
     @property
+    def name(self):
+        return self.__kit.name
+
+    @property
+    def SKU(self):
+        return self.__kit.SKU
+
+    @property
     def inventory_quantity(self) -> int:
         inventory_quantity = None
 
@@ -162,6 +170,10 @@ class ProductRepository(ABC):
 
     @abstractmethod
     def list(self) -> List[Product]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
         raise NotImplementedError
 
     @abstractmethod

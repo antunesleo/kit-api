@@ -50,6 +50,9 @@ class InMemoryProductRepository(ProductRepository):
 
         self.__products[index_to_update] = product_to_update
 
+    def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
+        return[product for product in self.__products if product.SKU in SKUs]
+
     def __next_id(self) -> int:
         try:
             return max(self.__products, key=lambda p: p.id).id + 1

@@ -175,8 +175,28 @@ class KitResource(ResourceBase):
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
 
-def register(products_service, kits_service):
+class CalculatedKitResource(ResourceBase):
+
+    def __init__(self, *args, **kwargs):
+        super(CalculatedKitResource, self).__init__(*args, **kwargs)
+        self.__calculated_kits_service = kwargs['calculated_kits_service']
+
+    @api.doc(responses={
+        200: 'It works!',
+        500: 'Sorry, this is my own fault.',
+        404: 'The Resource doesnt exists.'
+    })
+    @api.marshal_with(serializers.calculated_kit_model, code=200)
+    def get(self, kit_id):
+        try:
+            return self.__calculated_kits_service.calculate_kit(kit_id)
+        except NotFound:
+            api.abort(404, 'Kit Not Found.', kit_id=kit_id)
+
+
+def register(products_service, kits_service, calculated_kits_service):
     api.add_resource(ProductResource, '/api/products/<int:product_id>', resource_class_kwargs={'products_service': products_service})
     api.add_resource(ProductsResource, '/api/products', resource_class_kwargs={'products_service': products_service})
     api.add_resource(KitResource, '/api/kits/<int:kit_id>', resource_class_kwargs={'kits_service': kits_service})
     api.add_resource(KitsResource, '/api/kits', resource_class_kwargs={'kits_service': kits_service})
+    api.add_resource(CalculatedKitResource, '/api/calculated-kits/<int:kit_id>', resource_class_kwargs={'calculated_kits_service': calculated_kits_service})
