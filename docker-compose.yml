@@ -1,6 +1,18 @@
 version: "2"
 
 services:
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - ./data:/data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+
   kit-api:
     build:
       context: .
