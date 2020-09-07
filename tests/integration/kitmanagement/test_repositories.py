@@ -521,6 +521,11 @@ class TestMongoProductRepository(TestCase):
         self.assertEqual(product.price, created_product.price)
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
 
+    def test_get_by_id_should_raise_not_found_when_cant_find_product(self):
+        repository = MongoProductRepository(self.mongo_db)
+        with self.assertRaises(NotFound):
+            repository.get_by_id('5f566e9c1022bd08188d674b')
+
     def test_get_by_SKU(self):
         repository = MongoProductRepository(self.mongo_db)
         product = Product(

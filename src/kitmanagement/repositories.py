@@ -96,7 +96,7 @@ class InMemoryKitRepository(KitRepository):
         for kit in self.__kits:
             if kit.id == kit_id:
                 return kit
-        raise NotFound(f'product id: {kit_id} not found')
+        raise NotFound(f'kit id: {kit_id} not found')
 
     def remove(self, kit_id) -> None:
         index_to_remove = None
@@ -120,7 +120,7 @@ class InMemoryKitRepository(KitRepository):
                 break
 
         if index_to_update is None:
-            raise NotFound(f'product id: {kit_to_update.id} not found')
+            raise NotFound(f'kit id: {kit_to_update.id} not found')
 
         self.__kits[index_to_update] = kit_to_update
 
@@ -166,11 +166,13 @@ class MongoProductRepository(ProductRepository):
 
         return str(added_product.inserted_id)
 
-    def get_by_id(self, product_id: int) -> Product:
+    def get_by_id(self, product_id: str) -> Product:
         mongo_product = self.__collection.find_one({'_id': ObjectId(product_id)})
+        if not mongo_product:
+            raise NotFound(f'product id: {product_id} not found')
         return self.__create_product_from_mongo(mongo_product)
 
-    def get_by_SKU(self, SKU: int) -> Product:
+    def get_by_SKU(self, SKU: str) -> Product:
         mongo_product = self.__collection.find_one({'SKU': SKU})
         return self.__create_product_from_mongo(mongo_product)
 
