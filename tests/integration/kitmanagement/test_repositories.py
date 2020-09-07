@@ -521,6 +521,26 @@ class TestMongoProductRepository(TestCase):
         self.assertEqual(product.price, created_product.price)
         self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
 
+    def test_get_by_SKU(self):
+        repository = MongoProductRepository(self.mongo_db)
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        product_id = repository.add(product)
+
+        created_product = repository.get_by_SKU('AHJU-49685')
+
+        self.assertIsInstance(created_product, Product)
+        self.assertEqual(product_id, created_product.id)
+        self.assertEqual(product.name, created_product.name)
+        self.assertEqual(product.SKU, created_product.SKU)
+        self.assertEqual(product.price, created_product.price)
+        self.assertEqual(product.inventory_quantity, created_product.inventory_quantity)
+
     def test_list(self):
         repository = MongoProductRepository(self.mongo_db)
         first_product = Product(
