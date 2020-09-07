@@ -40,7 +40,7 @@ class Product(AggregateRoot):
     def inventory_quantity(self) -> int:
         return self.__inventory_quantity
 
-    def define_id(self, product_id: int) -> None:
+    def define_id(self, product_id: Union[int, str]) -> None:
         if self.__id:
             raise IdAlreadyDefined
         self.__id = product_id

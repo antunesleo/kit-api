@@ -154,13 +154,7 @@ class MongoProductRepository(ProductRepository):
 
     def add(self, product: Product) -> str:
         try:
-            added_product = self.__collection.insert_one({
-                'name': product.name,
-                'SKU': product.SKU,
-                'cost': product.cost,
-                'price': product.price,
-                'inventoryQuantity': product.inventory_quantity
-            })
+            added_product = self.__collection.insert_one(self.__create_mongo_product_from_product(product))
         except DuplicateKeyError:
             raise SKUExistsError('you must provide an unique SKU')
 
@@ -182,7 +176,13 @@ class MongoProductRepository(ProductRepository):
             raise NotFound(f'product id: {product_id} not found')
 
     def update(self, product: Product) -> None:
-        pass
+        mongo_product = self.__create_mongo_product_from_product(product)
+        result = self.__collection.update_one(
+            {'_id': ObjectId(product.id)},
+            {'$set': mongo_product}
+        )
+        if result.matched_count < 1:
+            raise NotFound(f'product id: {product.id} not found')
 
     def __create_product_from_mongo(self, mongo_product: dict) -> Product:
         return Product(
@@ -193,3 +193,12 @@ class MongoProductRepository(ProductRepository):
             price=mongo_product['price'],
             inventory_quantity=mongo_product['inventoryQuantity']
         )
+
+    def __create_mongo_product_from_product(self, product: Product) -> dict:
+        return {
+            'name': product.name,
+            'SKU': product.SKU,
+            'cost': product.cost,
+            'price': product.price,
+            'inventoryQuantity': product.inventory_quantity
+        }

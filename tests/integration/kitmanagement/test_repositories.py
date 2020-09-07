@@ -649,5 +649,52 @@ class TestMongoProductRepository(TestCase):
         with self.assertRaises(NotFound):
             repository.remove('5f566e9c1022bd08188d674b')
 
+    def test_update(self):
+        repository = MongoProductRepository(self.mongo_db)
+        product = Product(
+            name='Last of Us Part II',
+            SKU='AHJU-4968',
+            cost=2.00,
+            price=100.00,
+            inventory_quantity=100
+        )
+        product_id = repository.add(product)
+        repository.add(Product(
+            name='Bloodborne',
+            SKU='AHJU-1458',
+            cost=50.00,
+            price=200.00,
+            inventory_quantity=70
+        ))
+        product.define_id(product_id)
+
+        product.update_infos(
+            name='The Last of Us Part II',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        repository.update(product)
+
+        product = repository.get_by_id(product_id)
+        self.assertEqual(product.id, product_id)
+        self.assertEqual(product.name, 'The Last of Us Part II')
+        self.assertEqual(product.cost, 10.00)
+        self.assertEqual(product.price, 220.00)
+        self.assertEqual(product.inventory_quantity, 150)
+
+    def test_update_should_raise_not_found_when_cant_find_product(self):
+        repository = MongoProductRepository(self.mongo_db)
+        product = Product(
+            id='5f566e9c1022bd08188d674b',
+            name='Last of Us Part II',
+            SKU='AHJU-4968',
+            cost=2.00,
+            price=100.00,
+            inventory_quantity=100
+        )
+        with self.assertRaises(NotFound):
+            repository.update(product)
+
     def tearDown(self) -> None:
         self.mongo_db.drop_collection('products')
