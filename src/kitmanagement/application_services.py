@@ -57,7 +57,12 @@ class KitsService(ApplicationService):
     def update_kit(self, kit_id: int, kit_update_command: dict) -> Kit:
         kit_update_command = deepcopy(kit_update_command)
         kit = self.__kit_repository.get_by_id(kit_id)
-        kit_products = [KitProduct(**kit_product) for kit_product in kit_update_command.pop('kit_products')]
+
+        kit_products = []
+        for kit_product_dict in kit_update_command.pop('kit_products'):
+            self.__product_repository.get_by_SKU(kit_product_dict['product_SKU'])
+            kit_products.append(KitProduct(**kit_product_dict))
+
         kit.update_infos(**kit_update_command, kit_products=kit_products)
         self.__kit_repository.update(kit)
         return kit
