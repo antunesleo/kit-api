@@ -176,8 +176,10 @@ class MongoProductRepository(ProductRepository):
         mongo_product = self.__collection.find_one({'SKU': SKU})
         return self.__create_product_from_mongo(mongo_product)
 
-    def remove(self, product_id: int) -> None:
-        pass
+    def remove(self, product_id: str) -> None:
+        result = self.__collection.delete_one({'_id': ObjectId(product_id)})
+        if result.deleted_count < 1:
+            raise NotFound(f'product id: {product_id} not found')
 
     def update(self, product: Product) -> None:
         pass

@@ -628,5 +628,26 @@ class TestMongoProductRepository(TestCase):
         self.assertEqual(second_product.price, skus_products[1].price)
         self.assertEqual(second_product.inventory_quantity, skus_products[1].inventory_quantity)
 
+    def test_remove(self):
+        repository = MongoProductRepository(self.mongo_db)
+
+        product = Product(
+            name='The Last of Us Part II',
+            SKU='AHJU-49685',
+            cost=10.00,
+            price=220.00,
+            inventory_quantity=150
+        )
+        product_id = repository.add(product)
+        repository.remove(product_id)
+
+        with self.assertRaises(NotFound):
+            repository.get_by_id(product_id)
+
+    def test_remove_should_raise_not_found_when_cant_find_product(self):
+        repository = MongoProductRepository(self.mongo_db)
+        with self.assertRaises(NotFound):
+            repository.remove('5f566e9c1022bd08188d674b')
+
     def tearDown(self) -> None:
         self.mongo_db.drop_collection('products')
