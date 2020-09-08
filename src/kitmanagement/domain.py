@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
 from src.exceptions import IdAlreadyDefined
 from src.base.domain import AggregateRoot, ValueObject
@@ -8,7 +8,7 @@ from src.base.domain import AggregateRoot, ValueObject
 
 class Product(AggregateRoot):
 
-    def __init__(self, name: str, sku: str, cost: float, price: float, inventory_quantity: int, id: Union[int, str]=None):
+    def __init__(self, name: str, sku: str, cost: float, price: float, inventory_quantity: int, id: str=None):
         self.__id = id
         self.__name = name
         self.__sku = sku
@@ -17,7 +17,7 @@ class Product(AggregateRoot):
         self.__inventory_quantity = inventory_quantity
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         return self.__id
 
     @property
@@ -40,7 +40,7 @@ class Product(AggregateRoot):
     def inventory_quantity(self) -> int:
         return self.__inventory_quantity
 
-    def define_id(self, product_id: Union[int, str]) -> None:
+    def define_id(self, product_id: str) -> None:
         if self.__id:
             raise IdAlreadyDefined
         self.__id = product_id
@@ -83,7 +83,7 @@ class Kit(AggregateRoot):
     def kit_products(self) -> List[KitProduct]:
         return self.__kit_products
 
-    def define_id(self, product_id: Union[int, str]) -> None:
+    def define_id(self, product_id: str) -> None:
         if self.__id:
             raise IdAlreadyDefined
         self.__id = product_id
@@ -166,11 +166,11 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, product: Product) -> Union[int, str]:
+    def add(self, product: Product) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, product_id: Union[int, str]) -> Product:
+    def get_by_id(self, product_id: str) -> Product:
         raise NotImplementedError
 
     @abstractmethod
@@ -178,7 +178,7 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, product_id: Union[int, str]) -> None:
+    def remove(self, product_id: str) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -197,15 +197,15 @@ class KitRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, kit: Kit) -> Union[str, int]:
+    def add(self, kit: Kit) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, kit_id: Union[str, int]) -> Kit:
+    def get_by_id(self, kit_id: str) -> Kit:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, kit_id: Union[str, int]) -> None:
+    def remove(self, kit_id: str) -> None:
         raise NotImplementedError
 
     @abstractmethod

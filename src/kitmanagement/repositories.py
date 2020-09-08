@@ -1,6 +1,6 @@
 from abc import ABC
 from copy import deepcopy
-from typing import List, Union
+from typing import List
 
 from bson.objectid import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -83,7 +83,7 @@ class InMemoryKitRepository(KitRepository, ABC):
     def __init__(self):
         self.__kits : List[Kit] = []
 
-    def add(self, kit: Kit) -> Union[int, str]:
+    def add(self, kit: Kit) -> str:
         kit = deepcopy(kit)
         kit.define_id(self.__next_id())
         self.__raise_if_sku_already_exists(kit.sku)

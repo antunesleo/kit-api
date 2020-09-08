@@ -7,24 +7,24 @@ product_model = api.model('Product', {
     'id': fields.String,
     'name': fields.String,
     'sku': fields.String,
-    'cost': fields.String,
-    'price': fields.String,
-    'inventoryQuantity': fields.String(attribute='inventory_quantity')
+    'cost': fields.Float,
+    'price': fields.Float,
+    'inventoryQuantity': fields.Integer(attribute='inventory_quantity')
 })
 
 product_creation_command_model = api.model('ProductCreationCommand', {
     'name': fields.String(required=True),
     'sku': fields.String(required=True),
-    'cost': fields.String(required=True),
-    'price': fields.String(required=True),
-    'inventoryQuantity': fields.String(required=True, attribute='inventory_quantity')
+    'cost': fields.Float(required=True),
+    'price': fields.Float(required=True),
+    'inventoryQuantity': fields.Integer(required=True)
 })
 
 product_update_command_model = api.model('ProductUpdateCommand', {
     'name': fields.String(required=True),
-    'cost': fields.String(required=True),
-    'price': fields.String(required=True),
-    'inventoryQuantity': fields.String(required=True, attribute='inventory_quantity')
+    'cost': fields.Float(required=True),
+    'price': fields.Float(required=True),
+    'inventoryQuantity': fields.Integer(required=True)
 })
 
 

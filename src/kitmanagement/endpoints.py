@@ -1,12 +1,8 @@
-from flask import request
-from flask_restx import marshal
-from flask_restx.reqparse import ParseResult
-
 from src.exceptions import NotFound, skuExistsError, ProductInUseError
 from src.web_app import get_api
 
 from src.base.endpoints import ResourceBase, responses_doc_for
-from src.kitmanagement import serializers
+from src.kitmanagement import serialization
 
 
 api = get_api()
@@ -19,16 +15,17 @@ class ProductsResource(ResourceBase):
         super(ProductsResource, self).__init__(*args, **kwargs)
         self.__products_service = kwargs['products_service']
 
-    @api.marshal_list_with(serializers.product_model)
+    @api.marshal_list_with(serialization.product_model)
     @api.doc(responses=responses_doc_for(200, 500))
     def get(self):
+        zas = self.__products_service.list_products()
         return self.__products_service.list_products()
 
-    @api.expect(serializers.product_creation_command_model, validate=True)
-    @api.marshal_with(serializers.product_model, code=201)
+    @api.expect(serialization.product_creation_command_model, validate=True)
+    @api.marshal_with(serialization.product_model, code=201)
     @api.doc(responses=responses_doc_for(201, 400, 500))
     def post(self):
-        product_creation_command = self._serialize_in(serializers.product_creation_command_model)
+        product_creation_command = self._serialize_in(serialization.product_creation_command_model)
         try:
             product = self.__products_service.create_product(product_creation_command)
             return product, 201
@@ -42,7 +39,7 @@ class ProductResource(ResourceBase):
         super(ProductResource, self).__init__(*args, **kwargs)
         self.__products_service = kwargs['products_service']
 
-    @api.marshal_with(serializers.product_model)
+    @api.marshal_with(serialization.product_model)
     @api.doc(responses=responses_doc_for(200, 403, 404, 500))
     def get(self, product_id: str):
         try:
@@ -50,12 +47,12 @@ class ProductResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Product Not Found.', product_id=product_id)
 
-    @api.expect(serializers.product_update_command_model, validate=True)
-    @api.marshal_with(serializers.product_model, code=200)
+    @api.expect(serialization.product_update_command_model, validate=True)
+    @api.marshal_with(serialization.product_model, code=200)
     @api.doc(responses=responses_doc_for(200, 404, 500))
     def put(self, product_id: str):
         try:
-            product_update_command = self._serialize_in(serializers.product_update_command_model)
+            product_update_command = self._serialize_in(serialization.product_update_command_model)
             product = self.__products_service.update_product(product_id, product_update_command)
             return product, 200
         except NotFound:
@@ -79,11 +76,11 @@ class KitsResource(ResourceBase):
         super(KitsResource, self).__init__(*args, **kwargs)
         self.__kits_service = kwargs['kits_service']
 
-    @api.expect(serializers.kit_creation_command_model, validate=True)
-    @api.marshal_with(serializers.kit_model, code=201)
+    @api.expect(serialization.kit_creation_command_model, validate=True)
+    @api.marshal_with(serialization.kit_model, code=201)
     @api.doc(responses=responses_doc_for(201, 400, 404, 500))
     def post(self):
-        kit_creation_command = self._serialize_in(serializers.kit_creation_command_model)
+        kit_creation_command = self._serialize_in(serialization.kit_creation_command_model)
 
         try:
             kit = self.__kits_service.create_kit(kit_creation_command)
@@ -94,7 +91,7 @@ class KitsResource(ResourceBase):
             api.abort(400, 'The kit sku is already being used by another kit ', sku=kit_creation_command['sku'])
 
     @api.doc(responses=responses_doc_for(200, 500))
-    @api.marshal_list_with(serializers.kit_model, code=200)
+    @api.marshal_list_with(serialization.kit_model, code=200)
     def get(self):
         return self.__kits_service.list_kits()
 
@@ -107,18 +104,18 @@ class KitResource(ResourceBase):
         self.__kits_service = kwargs['kits_service']
 
     @api.doc(responses=responses_doc_for(200, 404, 500))
-    @api.marshal_with(serializers.kit_model, code=200)
+    @api.marshal_with(serialization.kit_model, code=200)
     def get(self, kit_id: str):
         try:
             return self.__kits_service.get_kit(kit_id)
         except NotFound:
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
-    @api.expect(serializers.kit_update_command_model, validate=True)
-    @api.marshal_with(serializers.kit_model, code=200)
+    @api.expect(serialization.kit_update_command_model, validate=True)
+    @api.marshal_with(serialization.kit_model, code=200)
     @api.doc(responses=responses_doc_for(200, 400, 404, 500))
     def put(self, kit_id: str):
-        kit_update_command = self._serialize_in(serializers.kit_update_command_model)
+        kit_update_command = self._serialize_in(serialization.kit_update_command_model)
 
         try:
             return self.__kits_service.update_kit(kit_id, kit_update_command)
@@ -141,7 +138,7 @@ class CalculatedKitResource(ResourceBase):
         self.__calculated_kits_service = kwargs['calculated_kits_service']
 
     @api.doc(responses=responses_doc_for(200, 404, 500))
-    @api.marshal_with(serializers.calculated_kit_model, code=200)
+    @api.marshal_with(serialization.calculated_kit_model, code=200)
     def get(self, kit_id: str):
         try:
             return self.__calculated_kits_service.calculate_kit(kit_id)

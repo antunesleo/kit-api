@@ -20,17 +20,17 @@ class ProductsService(ApplicationService):
     def list_products(self) -> List[Product]:
         return self.__product_repository.list()
 
-    def get_product(self, product_id: int) -> Product:
+    def get_product(self, product_id: str) -> Product:
         return self.__product_repository.get_by_id(product_id)
 
-    def remove_product(self, product_id: int) -> None:
+    def remove_product(self, product_id: str) -> None:
         product = self.__product_repository.get_by_id(product_id)
         kits_using_product = self.__kit_repository.list_with_product(product.sku)
         if kits_using_product:
             raise ProductInUseError('products being used by kits cant be removed')
         self.__product_repository.remove(product_id)
 
-    def update_product(self, product_id: int, product_update_command: dict) -> Product:
+    def update_product(self, product_id: str, product_update_command: dict) -> Product:
         product = self.__product_repository.get_by_id(product_id)
         product.update_infos(**product_update_command)
         self.__product_repository.update(product)
@@ -57,10 +57,10 @@ class KitsService(ApplicationService):
     def list_kits(self) -> List[Kit]:
         return self.__kit_repository.list()
 
-    def get_kit(self, kit_id: int) -> Kit:
+    def get_kit(self, kit_id: str) -> Kit:
         return self.__kit_repository.get_by_id(kit_id)
 
-    def update_kit(self, kit_id: int, kit_update_command: dict) -> Kit:
+    def update_kit(self, kit_id: str, kit_update_command: dict) -> Kit:
         kit_update_command = deepcopy(kit_update_command)
         kit = self.__kit_repository.get_by_id(kit_id)
 
@@ -73,7 +73,7 @@ class KitsService(ApplicationService):
         self.__kit_repository.update(kit)
         return kit
 
-    def remove_kit(self, kit_id) -> None:
+    def remove_kit(self, kit_id: str) -> None:
         self.__kit_repository.remove(kit_id)
 
 
@@ -83,7 +83,7 @@ class CalculatedKitsService(ApplicationService):
         self.__kit_repository = kit_repository
         self.__product_repository = product_repository
 
-    def calculate_kit(self, kit_id: int) -> CalculatedKit:
+    def calculate_kit(self, kit_id: str) -> CalculatedKit:
         kit = self.__kit_repository.get_by_id(kit_id)
         products = self.__product_repository.list_with_skus([
             kit_product.product_sku

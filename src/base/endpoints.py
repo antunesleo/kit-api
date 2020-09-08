@@ -6,6 +6,7 @@ from src.base.serialization import CaseStyleConverter
 RESPONSES_DOC = {
     200: 'OK. Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action',
     201: 'Created. The request has been fulfilled, resulting in the creation of a new resource.',
+    204: 'No Content. The server successfully processed the request, and is not returning any content.',
     400: 'The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).',
     403: 'Forbidden. The request contained valid data and was understood by the server, but the server is refusing action. This may be due to the user not having the necessary permissions for a resource or needing an account of some sort, or attempting a prohibited action (e.g. creating a duplicate record where only one is allowed). This code is also typically used if the request provided authentication by answering the WWW-Authenticate header field challenge, but the server did not accept that authentication. The request should not be repeated.',
     404: 'Not Found. The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.',
