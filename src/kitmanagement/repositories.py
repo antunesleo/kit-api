@@ -5,7 +5,7 @@ from typing import List, Union
 from bson.objectid import ObjectId
 from pymongo.errors import DuplicateKeyError
 
-from src.exceptions import NotFound, SKUExistsError
+from src.exceptions import NotFound, skuExistsError
 from src.kitmanagement.domain import ProductRepository, KitRepository, Kit, Product, KitProduct
 
 
@@ -17,7 +17,7 @@ class InMemoryProductRepository(ProductRepository):
     def add(self, product: Product) -> str:
         product = deepcopy(product)
         product.define_id(self.__next_id())
-        self.__raise_if_SKU_already_exists(product.SKU)
+        self.__raise_if_sku_already_exists(product.sku)
         self.__products.append(product)
         return product.id
 
@@ -30,9 +30,9 @@ class InMemoryProductRepository(ProductRepository):
                 return product
         raise NotFound(f'product id: {product_id} not found')
 
-    def get_by_SKU(self, sku: str) -> Product:
+    def get_by_sku(self, sku: str) -> Product:
         for product in self.__products:
-            if product.SKU == sku:
+            if product.sku == sku:
                 return product
         raise NotFound(f'product sku: {sku} not found')
 
@@ -62,8 +62,8 @@ class InMemoryProductRepository(ProductRepository):
 
         self.__products[index_to_update] = product_to_update
 
-    def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
-        return[product for product in self.__products if product.SKU in SKUs]
+    def list_with_skus(self, skus: List[str]) -> List[Product]:
+        return[product for product in self.__products if product.sku in skus]
 
     def __next_id(self) -> str:
         try:
@@ -71,10 +71,10 @@ class InMemoryProductRepository(ProductRepository):
         except ValueError:
             return '1'
 
-    def __raise_if_SKU_already_exists(self, SKU: str) -> None:
+    def __raise_if_sku_already_exists(self, sku: str) -> None:
         for product in self.__products:
-            if product.SKU == SKU:
-                raise SKUExistsError('you must provide an unique SKU')
+            if product.sku == sku:
+                raise skuExistsError('you must provide an unique sku')
         return None
 
 
@@ -86,18 +86,18 @@ class InMemoryKitRepository(KitRepository, ABC):
     def add(self, kit: Kit) -> Union[int, str]:
         kit = deepcopy(kit)
         kit.define_id(self.__next_id())
-        self.__raise_if_SKU_already_exists(kit.SKU)
+        self.__raise_if_sku_already_exists(kit.sku)
         self.__kits.append(kit)
         return kit.id
 
     def list(self, for_read=True) -> List[Kit]:
         return self.__kits
 
-    def list_with_product(self, product_SKU: str) -> List[Kit]:
+    def list_with_product(self, product_sku: str) -> List[Kit]:
         kits = []
         for kit in self.__kits:
             for kit_product in kit.kit_products:
-                if kit_product.product_SKU == product_SKU:
+                if kit_product.product_sku == product_sku:
                     kits.append(kit)
         return kits
 
@@ -139,10 +139,10 @@ class InMemoryKitRepository(KitRepository, ABC):
         except ValueError:
             return '1'
 
-    def __raise_if_SKU_already_exists(self, SKU: str) -> None:
+    def __raise_if_sku_already_exists(self, sku: str) -> None:
         for kit in self.__kits:
-            if kit.SKU == SKU:
-                raise SKUExistsError('you must provide an unique SKU')
+            if kit.sku == sku:
+                raise skuExistsError('you must provide an unique sku')
         return None
 
 
@@ -155,17 +155,17 @@ class MongoProductRepository(ProductRepository):
     def list(self) -> List[Product]:
         return [self.__create_product_from_mongo(mongo_product) for mongo_product in self.__collection.find()]
 
-    def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
+    def list_with_skus(self, skus: List[str]) -> List[Product]:
         return [
             self.__create_product_from_mongo(mongo_product)
-            for mongo_product in self.__collection.find({'SKU': {'$in': SKUs}}).sort('_id')
+            for mongo_product in self.__collection.find({'sku': {'$in': skus}}).sort('_id')
         ]
 
     def add(self, product: Product) -> str:
         try:
             added_product = self.__collection.insert_one(self.__create_mongo_product_from_product(product))
         except DuplicateKeyError:
-            raise SKUExistsError('you must provide an unique SKU')
+            raise skuExistsError('you must provide an unique sku')
 
         return str(added_product.inserted_id)
 
@@ -175,10 +175,10 @@ class MongoProductRepository(ProductRepository):
             raise NotFound(f'product id: {product_id} not found')
         return self.__create_product_from_mongo(mongo_product)
 
-    def get_by_SKU(self, SKU: str) -> Product:
-        mongo_product = self.__collection.find_one({'SKU': SKU})
+    def get_by_sku(self, sku: str) -> Product:
+        mongo_product = self.__collection.find_one({'sku': sku})
         if not mongo_product:
-            raise NotFound(f'product SKU: {SKU} not found')
+            raise NotFound(f'product sku: {sku} not found')
         return self.__create_product_from_mongo(mongo_product)
 
     def remove(self, product_id: str) -> None:
@@ -199,7 +199,7 @@ class MongoProductRepository(ProductRepository):
         return Product(
             id=str(mongo_product['_id']),
             name=mongo_product['name'],
-            SKU=mongo_product['SKU'],
+            sku=mongo_product['sku'],
             cost=mongo_product['cost'],
             price=mongo_product['price'],
             inventory_quantity=mongo_product['inventoryQuantity']
@@ -208,7 +208,7 @@ class MongoProductRepository(ProductRepository):
     def __create_mongo_product_from_product(self, product: Product) -> dict:
         return {
             'name': product.name,
-            'SKU': product.SKU,
+            'sku': product.sku,
             'cost': product.cost,
             'price': product.price,
             'inventoryQuantity': product.inventory_quantity
@@ -224,14 +224,14 @@ class MongoKitRepository(KitRepository):
     def list(self) -> List[Kit]:
         return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find()]
 
-    def list_with_product(self, product_SKU: str) -> List[Kit]:
-        return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find({"kitProducts.productSKU": product_SKU})]
+    def list_with_product(self, product_sku: str) -> List[Kit]:
+        return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find({"kitProducts.productSku": product_sku})]
 
     def add(self, kit: Kit) -> str:
         try:
             added_kit = self.__collection.insert_one(self.__create_mongo_kit_from_kit(kit))
         except DuplicateKeyError:
-            raise SKUExistsError('you must provide an unique SKU')
+            raise skuExistsError('you must provide an unique sku')
 
         return str(added_kit.inserted_id)
 
@@ -259,7 +259,7 @@ class MongoKitRepository(KitRepository):
     def __create_kit_from_mongo(kit_mongo: dict) -> Kit:
         kit_products = [
             KitProduct(
-                product_SKU=kit_product_mongo['productSKU'],
+                product_sku=kit_product_mongo['productSku'],
                 quantity=kit_product_mongo['quantity'],
                 discount_percentage=kit_product_mongo['discountPercentage']
             )
@@ -268,14 +268,14 @@ class MongoKitRepository(KitRepository):
         return Kit(
             id=str(kit_mongo['_id']),
             name=kit_mongo['name'],
-            SKU=kit_mongo['SKU'],
+            sku=kit_mongo['sku'],
             kit_products=kit_products
         )
 
     def __create_mongo_kit_from_kit(self, kit: Kit) -> dict:
         kit_products_mongo = [
             {
-                'productSKU': kit_product.product_SKU,
+                'productSku': kit_product.product_sku,
                 'quantity': kit_product.quantity,
                 'discountPercentage': kit_product.discount_percentage
             }
@@ -283,6 +283,6 @@ class MongoKitRepository(KitRepository):
         ]
         return {
             'name': kit.name,
-            'SKU': kit.SKU,
+            'sku': kit.sku,
             'kitProducts': kit_products_mongo
         }

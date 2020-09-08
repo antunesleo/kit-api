@@ -1,6 +1,7 @@
+from flask import request
 from flask_restx.reqparse import ParseResult
 
-from src.exceptions import NotFound, SKUExistsError, ProductInUseError
+from src.exceptions import NotFound, skuExistsError, ProductInUseError
 from src.web_app import get_api
 
 from src.base.endpoints import ResourceBase, responses_doc_for
@@ -30,8 +31,8 @@ class ProductsResource(ResourceBase):
         try:
             product = self.__products_service.create_product(product_creation_command)
             return product, 201
-        except SKUExistsError:
-            api.abort(403, 'The product SKU is already being used by another product', SKU=product_creation_command['SKU'])
+        except skuExistsError:
+            api.abort(403, 'The product sku is already being used by another product', sku=product_creation_command['sku'])
 
 
 class ProductResource(ResourceBase):
@@ -77,25 +78,19 @@ class KitsResource(ResourceBase):
         super(KitsResource, self).__init__(*args, **kwargs)
         self.__kits_service = kwargs['kits_service']
 
-    @api.expect(api.schema_model('KitCreationCommand', serializers.kit_creation_schema), validate=True)
+    @api.expect(serializers.kit_creation_command_model, validate=True)
     @api.marshal_with(serializers.kit_model, code=201)
     @api.doc(responses=responses_doc_for(201, 400, 404, 500))
     def post(self):
-        kit_creation_command = serializers.kit_creation_parser.parse_args()
-        kit_creation_command['kit_products'] = [
-            serializers.kit_product_parser.parse_args(
-                req=ParseResult(json=kit_product)
-            )
-            for kit_product in kit_creation_command.pop('kitProducts')
-        ]
+        kit_creation_command = self._converter.camel_to_snake(request.json)
 
         try:
             kit = self.__kits_service.create_kit(kit_creation_command)
             return kit, 201
         except NotFound:
             api.abort(404, 'Product Not Found.')
-        except SKUExistsError:
-            api.abort(400, 'The kit SKU is already being used by another kit ', SKU=kit_creation_command['SKU'])
+        except skuExistsError:
+            api.abort(400, 'The kit sku is already being used by another kit ', sku=kit_creation_command['sku'])
 
     @api.doc(responses=responses_doc_for(200, 500))
     @api.marshal_list_with(serializers.kit_model, code=200)
@@ -118,17 +113,11 @@ class KitResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
-    @api.expect(api.schema_model('KitUpdateCommand', serializers.kit_update_schema), validate=True)
+    @api.expect(serializers.kit_update_command_model, validate=True)
     @api.marshal_with(serializers.kit_model, code=200)
     @api.doc(responses=responses_doc_for(200, 400, 404, 500))
     def put(self, kit_id: str):
-        kit_update_command = serializers.kit_update_parser.parse_args()
-        kit_update_command['kit_products'] = [
-            serializers.kit_product_parser.parse_args(
-                req=ParseResult(json=kit_product)
-            )
-            for kit_product in kit_update_command.pop('kitProducts')
-        ]
+        kit_update_command = self._converter.camel_to_snake(request.json)
 
         try:
             return self.__kits_service.update_kit(kit_id, kit_update_command)

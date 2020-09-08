@@ -10,7 +10,7 @@ class IdAlreadyDefined(Exception):
     pass
 
 
-class SKUExistsError(Exception):
+class skuExistsError(Exception):
     pass
 
 

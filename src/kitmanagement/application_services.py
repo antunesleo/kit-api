@@ -25,7 +25,7 @@ class ProductsService(ApplicationService):
 
     def remove_product(self, product_id: int) -> None:
         product = self.__product_repository.get_by_id(product_id)
-        kits_using_product = self.__kit_repository.list_with_product(product.SKU)
+        kits_using_product = self.__kit_repository.list_with_product(product.sku)
         if kits_using_product:
             raise ProductInUseError('products being used by kits cant be removed')
         self.__product_repository.remove(product_id)
@@ -46,7 +46,7 @@ class KitsService(ApplicationService):
     def create_kit(self, kit_creation_command: dict) -> Kit:
         kit_products = []
         for kit_product_dict in kit_creation_command.pop('kit_products'):
-            self.__product_repository.get_by_SKU(kit_product_dict['product_SKU'])
+            self.__product_repository.get_by_sku(kit_product_dict['product_sku'])
             kit_products.append(KitProduct(**kit_product_dict))
 
         kit = Kit(**kit_creation_command, kit_products=kit_products)
@@ -66,7 +66,7 @@ class KitsService(ApplicationService):
 
         kit_products = []
         for kit_product_dict in kit_update_command.pop('kit_products'):
-            self.__product_repository.get_by_SKU(kit_product_dict['product_SKU'])
+            self.__product_repository.get_by_sku(kit_product_dict['product_sku'])
             kit_products.append(KitProduct(**kit_product_dict))
 
         kit.update_infos(**kit_update_command, kit_products=kit_products)
@@ -85,8 +85,8 @@ class CalculatedKitsService(ApplicationService):
 
     def calculate_kit(self, kit_id: int) -> CalculatedKit:
         kit = self.__kit_repository.get_by_id(kit_id)
-        products = self.__product_repository.list_with_SKUs([
-            kit_product.product_SKU
+        products = self.__product_repository.list_with_skus([
+            kit_product.product_sku
             for kit_product in kit.kit_products
         ])
         return CalculatedKit(kit, products)

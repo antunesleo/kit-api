@@ -9,13 +9,13 @@ class TestProduct(TestCase):
     def test_product_initialization_should_have_all_fields(self):
         product = Product(
             name='The Last of Us Part II',
-            SKU='AHJU-49685',
+            sku='AHJU-49685',
             cost=10.00,
             price=220.00,
             inventory_quantity=150
         )
         self.assertEqual(product.name, 'The Last of Us Part II')
-        self.assertEqual(product.SKU, 'AHJU-49685')
+        self.assertEqual(product.sku, 'AHJU-49685')
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
@@ -24,7 +24,7 @@ class TestProduct(TestCase):
         product = Product(
             id=1,
             name='The Last of Us Part II',
-            SKU='AHJU-49685',
+            sku='AHJU-49685',
             cost=10.00,
             price=220.00,
             inventory_quantity=150
@@ -35,7 +35,7 @@ class TestProduct(TestCase):
         product = Product(
             id=1,
             name='Last of Us Part II',
-            SKU='AHJU-4968',
+            sku='AHJU-4968',
             cost=2.00,
             price=100.00,
             inventory_quantity=100
@@ -56,11 +56,11 @@ class TestProductKit(TestCase):
 
     def test_product_kit_initialization(self):
         kit_product = KitProduct(
-            product_SKU='FASD-498',
+            product_sku='FASD-498',
             quantity=2,
             discount_percentage=10.5
         )
-        self.assertEqual(kit_product.product_SKU, 'FASD-498')
+        self.assertEqual(kit_product.product_sku, 'FASD-498')
         self.assertEqual(kit_product.quantity, 2)
         self.assertEqual(kit_product.discount_percentage, 10.5)
 
@@ -70,52 +70,52 @@ class TestKit(TestCase):
     def test_kit_initialization(self):
         kit_products = [
             KitProduct(
-                product_SKU='FASD-498',
+                product_sku='FASD-498',
                 quantity=2,
                 discount_percentage=10.5
             ),
             KitProduct(
-                product_SKU='FASD-1489',
+                product_sku='FASD-1489',
                 quantity=1,
                 discount_percentage=10.5
             )
         ]
         kit = Kit(
             name='Sony Gaming Pack',
-            SKU='FASD-789',
+            sku='FASD-789',
             kit_products=kit_products
         )
         self.assertEqual(kit.name, 'Sony Gaming Pack')
-        self.assertEqual(kit.SKU, 'FASD-789')
+        self.assertEqual(kit.sku, 'FASD-789')
         self.assertEqual(kit.kit_products, kit_products)
 
     def test_should_update_infos(self):
         kit_products = [
             KitProduct(
-                product_SKU='FASD-498',
+                product_sku='FASD-498',
                 quantity=2,
                 discount_percentage=10.5
             ),
             KitProduct(
-                product_SKU='FASD-1489',
+                product_sku='FASD-1489',
                 quantity=1,
                 discount_percentage=10.5
             )
         ]
         kit = Kit(
             name='Sony Gaming Pack',
-            SKU='FASD-789',
+            sku='FASD-789',
             kit_products=kit_products
         )
 
         updated_kit_products = [
             KitProduct(
-                product_SKU='FASD-4918',
+                product_sku='FASD-4918',
                 quantity=7,
                 discount_percentage=20.5
             ),
             KitProduct(
-                product_SKU='FASD-14289',
+                product_sku='FASD-14289',
                 quantity=7,
                 discount_percentage=32.5
             )
@@ -137,17 +137,17 @@ class TestCalculatedKit(TestCase):
         product_A_mock.inventory_quantity = 10
         product_A_mock.cost = 20.00
         product_A_mock.price = 100.00
-        product_A_mock.SKU = 'A'
+        product_A_mock.sku = 'A'
         product_B_mock = mock.MagicMock()
         product_B_mock.inventory_quantity = 50
         product_B_mock.cost = 10.00
         product_B_mock.price = 80.00
-        product_B_mock.SKU = 'B'
+        product_B_mock.sku = 'B'
         product_C_mock = mock.MagicMock()
         product_C_mock.cost = 15.00
         product_C_mock.price = 60.00
         product_C_mock.inventory_quantity = 38
-        product_C_mock.SKU = 'C'
+        product_C_mock.sku = 'C'
         self.products_mock = [
             product_A_mock,
             product_B_mock,
@@ -156,15 +156,15 @@ class TestCalculatedKit(TestCase):
 
         kit_product_A_mock = mock.MagicMock()
         kit_product_A_mock.quantity = 2
-        kit_product_A_mock.product_SKU = 'A'
+        kit_product_A_mock.product_sku = 'A'
         kit_product_A_mock.discount_percentage = 10.00
         kit_product_B_mock = mock.MagicMock()
         kit_product_B_mock.quantity = 1
-        kit_product_B_mock.product_SKU = 'B'
+        kit_product_B_mock.product_sku = 'B'
         kit_product_B_mock.discount_percentage = 20.00
         kit_product_C_mock = mock.MagicMock()
         kit_product_C_mock.quantity = 5
-        kit_product_C_mock.product_SKU = 'C'
+        kit_product_C_mock.product_sku = 'C'
         kit_product_C_mock.discount_percentage = 15.00
         kit_products_mock = [
             kit_product_A_mock,

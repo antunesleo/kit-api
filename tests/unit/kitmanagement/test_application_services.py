@@ -14,7 +14,7 @@ class TestProductsService(TestCase):
         service = ProductsService(repository_mock, kit_repository_mock)
         product_creation_command = {
             'name': 'The Last of Us Part II',
-            'SKU': 'AHJU-49685',
+            'sku': 'AHJU-49685',
             'cost': 10.00,
             'price': 220.00,
             'inventory_quantity': 150
@@ -24,7 +24,7 @@ class TestProductsService(TestCase):
         repository_mock.add.assert_called()
         product = repository_mock.add.mock_calls[0].args[0]
         self.assertEqual(product.name, 'The Last of Us Part II')
-        self.assertEqual(product.SKU, 'AHJU-49685')
+        self.assertEqual(product.sku, 'AHJU-49685')
         self.assertEqual(product.cost, 10.00)
         self.assertEqual(product.price, 220.00)
         self.assertEqual(product.inventory_quantity, 150)
@@ -53,7 +53,7 @@ class TestProductsService(TestCase):
         kit_repository_mock = mock.MagicMock()
         kit_repository_mock.list_with_product.return_value = []
 
-        product_mock = mock.MagicMock(SKU='FASD-1')
+        product_mock = mock.MagicMock(sku='FASD-1')
         product_repository_mock = mock.MagicMock()
         product_repository_mock.get_by_id.return_value = product_mock
 
@@ -66,7 +66,7 @@ class TestProductsService(TestCase):
         kit_repository_mock = mock.MagicMock()
         kit_repository_mock.list_with_product.return_value = [mock.MagicMock()]
 
-        product_mock = mock.MagicMock(SKU='FASD-1')
+        product_mock = mock.MagicMock(sku='FASD-1')
         product_repository_mock = mock.MagicMock()
         product_repository_mock.get_by_id.return_value = product_mock
 
@@ -81,7 +81,7 @@ class TestProductsService(TestCase):
         kit_repository_mock = mock.MagicMock()
         product_update_command = {
             'name': 'The Last of Us Part II',
-            'SKU': 'AHJU-49685',
+            'sku': 'AHJU-49685',
             'cost': 10.00,
             'price': 220.00,
             'inventory_quantity': 150
@@ -103,16 +103,16 @@ class TestKitService(TestCase):
 
     def test_create_kit(self):
         kit_creation_command = {
-            'SKU': 'FASF-123',
+            'sku': 'FASF-123',
             'name': 'Sony Pack I',
             'kit_products': [
                 {
-                    'product_SKU': 'AHJU-49685',
+                    'product_sku': 'AHJU-49685',
                     'quantity': 1,
                     'discount_percentage': 10
                 },
                 {
-                    'product_SKU': 'AHJU-49621',
+                    'product_sku': 'AHJU-49621',
                     'quantity': 2,
                     'discount_percentage': 15
                 }
@@ -125,14 +125,14 @@ class TestKitService(TestCase):
 
         created_kit = kit_repository_mock.add.mock_calls[0].args[0]
         self.assertIsInstance(returned_kit, Kit)
-        self.assertEqual(created_kit.SKU, 'FASF-123')
+        self.assertEqual(created_kit.sku, 'FASF-123')
         self.assertEqual(created_kit.name, 'Sony Pack I')
         self.assertIsInstance(created_kit.kit_products[0], KitProduct)
-        self.assertEqual(created_kit.kit_products[0].product_SKU, 'AHJU-49685')
+        self.assertEqual(created_kit.kit_products[0].product_sku, 'AHJU-49685')
         self.assertEqual(created_kit.kit_products[0].quantity, 1)
         self.assertEqual(created_kit.kit_products[0].discount_percentage, 10)
         self.assertIsInstance(created_kit.kit_products[1], KitProduct)
-        self.assertEqual(created_kit.kit_products[1].product_SKU, 'AHJU-49621')
+        self.assertEqual(created_kit.kit_products[1].product_sku, 'AHJU-49621')
         self.assertEqual(created_kit.kit_products[1].quantity, 2)
         self.assertEqual(created_kit.kit_products[1].discount_percentage, 15)
 
@@ -162,16 +162,16 @@ class TestKitService(TestCase):
 
     def test_update_kit(self):
         kit_update_command = {
-            'SKU': 'FASF-123',
+            'sku': 'FASF-123',
             'name': 'Sony Pack I',
             'kit_products': [
                 {
-                    'product_SKU': 'AHJU-49685',
+                    'product_sku': 'AHJU-49685',
                     'quantity': 1,
                     'discount_percentage': 10
                 },
                 {
-                    'product_SKU': 'AHJU-49621',
+                    'product_sku': 'AHJU-49621',
                     'quantity': 2,
                     'discount_percentage': 15
                 }
@@ -206,18 +206,18 @@ class TestCalculatedKitsService(TestCase):
         product_A_mock.inventory_quantity = 10
         product_A_mock.cost = 20.00
         product_A_mock.price = 100.00
-        product_A_mock.SKU = 'A'
+        product_A_mock.sku = 'A'
         products_mock = [product_A_mock]
 
         kit_product_A_mock = mock.MagicMock()
         kit_product_A_mock.quantity = 2
-        kit_product_A_mock.product_SKU = 'A'
+        kit_product_A_mock.product_sku = 'A'
         kit_product_A_mock.discount_percentage = 10.00
         kit_mock = mock.MagicMock()
         kit_mock.kit_products = [kit_product_A_mock]
 
         product_repository_mock = mock.MagicMock()
-        product_repository_mock.list_with_SKUs.return_value = products_mock
+        product_repository_mock.list_with_skus.return_value = products_mock
         kit_repository_mock = mock.MagicMock()
         kit_repository_mock.get_by_id.return_value = kit_mock
 

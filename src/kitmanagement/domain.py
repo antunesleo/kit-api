@@ -8,10 +8,10 @@ from src.base.domain import AggregateRoot, ValueObject
 
 class Product(AggregateRoot):
 
-    def __init__(self, name: str, SKU: str, cost: float, price: float, inventory_quantity: int, id: Union[int, str]=None):
+    def __init__(self, name: str, sku: str, cost: float, price: float, inventory_quantity: int, id: Union[int, str]=None):
         self.__id = id
         self.__name = name
-        self.__SKU = SKU
+        self.__sku = sku
         self.__cost = cost
         self.__price = price
         self.__inventory_quantity = inventory_quantity
@@ -25,8 +25,8 @@ class Product(AggregateRoot):
         return self.__name
 
     @property
-    def SKU(self) -> str:
-        return self.__SKU
+    def sku(self) -> str:
+        return self.__sku
 
     @property
     def cost(self) -> float:
@@ -54,17 +54,17 @@ class Product(AggregateRoot):
 
 @dataclass(frozen=True)
 class KitProduct(ValueObject):
-    product_SKU: str
+    product_sku: str
     quantity: int
     discount_percentage: float
 
 
 class Kit(AggregateRoot):
 
-    def __init__(self, name: str, SKU: str, kit_products: List[KitProduct], id: str=None):
+    def __init__(self, name: str, sku: str, kit_products: List[KitProduct], id: str=None):
         self.__id = id
         self.__name = name
-        self.__SKU = SKU
+        self.__sku = sku
         self.__kit_products = kit_products
 
     @property
@@ -76,8 +76,8 @@ class Kit(AggregateRoot):
         return self.__name
 
     @property
-    def SKU(self) -> str:
-        return self.__SKU
+    def sku(self) -> str:
+        return self.__sku
 
     @property
     def kit_products(self) -> List[KitProduct]:
@@ -104,15 +104,15 @@ class CalculatedKit:
         return self.__kit.name
 
     @property
-    def SKU(self):
-        return self.__kit.SKU
+    def sku(self):
+        return self.__kit.sku
 
     @property
     def inventory_quantity(self) -> int:
         inventory_quantity = None
 
         for kit_product in self.__kit.kit_products:
-            product = self.__get_product_with(kit_product.product_SKU)
+            product = self.__get_product_with(kit_product.product_sku)
             kit_product_inventory_quantity = int(product.inventory_quantity / kit_product.quantity)
 
             if not inventory_quantity:
@@ -129,7 +129,7 @@ class CalculatedKit:
         cost = 0.0
 
         for kit_product in self.__kit.kit_products:
-            product = self.__get_product_with(kit_product.product_SKU)
+            product = self.__get_product_with(kit_product.product_sku)
             cost += product.cost * kit_product.quantity
 
         return cost
@@ -139,15 +139,15 @@ class CalculatedKit:
         price = 0.0
 
         for kit_product in self.__kit.kit_products:
-            product = self.__get_product_with(kit_product.product_SKU)
+            product = self.__get_product_with(kit_product.product_sku)
             kit_product_price = self.__apply_discount(product.price * kit_product.quantity, kit_product.discount_percentage)
             price += kit_product_price
 
         return price
 
-    def __get_product_with(self, SKU: str) -> Product:
+    def __get_product_with(self, sku: str) -> Product:
         for product in self.__products:
-            if SKU == product.SKU:
+            if sku == product.sku:
                 return product
         raise ValueError('Must have one product for each kit.kit_product')
 
@@ -162,7 +162,7 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def list_with_SKUs(self, SKUs: List[str]) -> List[Product]:
+    def list_with_skus(self, skus: List[str]) -> List[Product]:
         raise NotImplementedError
 
     @abstractmethod
@@ -174,7 +174,7 @@ class ProductRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_SKU(self, SKU: str) -> Product:
+    def get_by_sku(self, sku: str) -> Product:
         raise NotImplementedError
 
     @abstractmethod
@@ -193,7 +193,7 @@ class KitRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def list_with_product(self, product_SKU: str) -> List[Kit]:
+    def list_with_product(self, product_sku: str) -> List[Kit]:
         raise NotImplementedError
 
     @abstractmethod

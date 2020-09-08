@@ -2,6 +2,8 @@ from typing import List
 
 from flask_restx import Resource
 
+from src.base.serializers import CaseStyleConverter
+
 RESPONSES_DOC = {
     200: 'OK. Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action',
     201: 'Created. The request has been fulfilled, resulting in the creation of a new resource.',
@@ -28,3 +30,4 @@ class ResourceBase(Resource):
 
     def __init__(self,  *args, **kwargs):
         super(ResourceBase, self).__init__( *args, **kwargs)
+        self._converter = CaseStyleConverter()

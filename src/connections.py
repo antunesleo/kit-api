@@ -20,5 +20,5 @@ def register(web_app: Flask) -> None:
     global mongo_kit_db
     mongo_client = pymongo.MongoClient(config.MONGO_HOST, config.MONGO_PORT)
     mongo_kit_db = mongo_client['kit']
-    mongo_kit_db.products.create_index("SKU", unique=True)
-    mongo_kit_db.kits.create_index("SKU", unique=True)
+    mongo_kit_db.products.create_index("sku", unique=True)
+    mongo_kit_db.kits.create_index("sku", unique=True)
