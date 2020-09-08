@@ -1,7 +1,7 @@
 from unittest import mock
 
 from src.kitmanagement.domain import Product, KitProduct, Kit, CalculatedKit
-from tests.unit.base import TestCase
+from tests.unit.testbase import TestCase
 
 
 class TestProduct(TestCase):

@@ -1,11 +1,9 @@
-from flask import request
 from flask_restx.reqparse import ParseResult
 
-from src.exceptions import NotFound, SKUExistsError
-from src.kitmanagement.domain import Product
+from src.exceptions import NotFound, SKUExistsError, ProductInUseError
 from src.web_app import get_api
 
-from src.base.endpoints import ResourceBase
+from src.base.endpoints import ResourceBase, responses_doc_for
 from src.kitmanagement import serializers
 
 
@@ -20,27 +18,20 @@ class ProductsResource(ResourceBase):
         self.__products_service = kwargs['products_service']
 
     @api.marshal_list_with(serializers.product_model)
-    @api.doc(responses={
-        200: 'It works!',
-        500: 'Sorry, this is my own fault.'
-    })
+    @api.doc(responses=responses_doc_for(200, 500))
     def get(self):
         return self.__products_service.list_products()
 
     @api.expect(serializers.product_creation_parser)
     @api.marshal_with(serializers.product_model, code=201)
-    @api.doc(responses={
-        201: 'It works!',
-        400: 'Checkout the payload and query strings, bad parameter.',
-        500: 'Sorry, this is my own fault.'
-    })
+    @api.doc(responses=responses_doc_for(201, 400, 500))
     def post(self):
         product_creation_command = serializers.product_creation_parser.parse_args()
         try:
             product = self.__products_service.create_product(product_creation_command)
             return product, 201
         except SKUExistsError:
-            api.abort(400, 'The product SKU is already being used by another product', SKU=product_creation_command['SKU'])
+            api.abort(403, 'The product SKU is already being used by another product', SKU=product_creation_command['SKU'])
 
 
 class ProductResource(ResourceBase):
@@ -50,11 +41,7 @@ class ProductResource(ResourceBase):
         self.__products_service = kwargs['products_service']
 
     @api.marshal_with(serializers.product_model)
-    @api.doc(responses={
-        200: 'It works!',
-        500: 'Sorry, this is my own fault.',
-        404: 'The Resource doesnt exists.'
-    })
+    @api.doc(responses=responses_doc_for(200, 403, 404, 500))
     def get(self, product_id: str):
         try:
             return self.__products_service.get_product(product_id)
@@ -63,11 +50,7 @@ class ProductResource(ResourceBase):
 
     @api.expect(serializers.product_update_parser)
     @api.marshal_with(serializers.product_model, code=200)
-    @api.doc(responses={
-        200: 'It works!',
-        500: 'Sorry, this is my own fault.',
-        404: 'The Resource doesnt exists.'
-    })
+    @api.doc(responses=responses_doc_for(200, 404, 500))
     def put(self, product_id: str):
         try:
             product_update_command = serializers.product_update_parser.parse_args()
@@ -76,15 +59,13 @@ class ProductResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Product Not Found.', product_id=product_id)
 
-    @api.doc(responses={
-        204: 'It works!',
-        404: 'The Resource doesnt exists.',
-        500: 'Sorry, this is my own fault.'
-    })
+    @api.doc(responses=responses_doc_for(204, 403, 404, 500))
     def delete(self, product_id: str):
         try:
             self.__products_service.remove_product(product_id)
             return {}, 204
+        except ProductInUseError:
+            api.abort(403, 'Product is being used by a kit.', product_id=product_id)
         except NotFound:
             api.abort(404, 'Product Not Found.', product_id=product_id)
 
@@ -96,14 +77,9 @@ class KitsResource(ResourceBase):
         super(KitsResource, self).__init__(*args, **kwargs)
         self.__kits_service = kwargs['kits_service']
 
-    @api.expect(api.schema_model('kit_creation_command', serializers.kit_creation_schema), validate=True)
+    @api.expect(api.schema_model('KitCreationCommand', serializers.kit_creation_schema), validate=True)
     @api.marshal_with(serializers.kit_model, code=201)
-    @api.doc(responses={
-        201: 'It works!',
-        400: 'Checkout the payload and query strings, bad parameter.',
-        404: 'The Resource doesnt exists.',
-        500: 'Sorry, this is my own fault.'
-    })
+    @api.doc(responses=responses_doc_for(201, 400, 404, 500))
     def post(self):
         kit_creation_command = serializers.kit_creation_parser.parse_args()
         kit_creation_command['kit_products'] = [
@@ -121,10 +97,7 @@ class KitsResource(ResourceBase):
         except SKUExistsError:
             api.abort(400, 'The kit SKU is already being used by another kit ', SKU=kit_creation_command['SKU'])
 
-    @api.doc(responses={
-        200: 'It works!',
-        500: 'Sorry, this is my own fault.'
-    })
+    @api.doc(responses=responses_doc_for(200, 500))
     @api.marshal_list_with(serializers.kit_model, code=200)
     def get(self):
         return self.__kits_service.list_kits()
@@ -137,11 +110,7 @@ class KitResource(ResourceBase):
         super(KitResource, self).__init__(*args, **kwargs)
         self.__kits_service = kwargs['kits_service']
 
-    @api.doc(responses={
-        200: 'It works!',
-        500: 'Sorry, this is my own fault.',
-        404: 'The Resource doesnt exists.'
-    })
+    @api.doc(responses=responses_doc_for(200, 404, 500))
     @api.marshal_with(serializers.kit_model, code=200)
     def get(self, kit_id: str):
         try:
@@ -149,14 +118,9 @@ class KitResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
-    @api.expect(api.schema_model('kit_update_command', serializers.kit_update_schema), validate=True)
+    @api.expect(api.schema_model('KitUpdateCommand', serializers.kit_update_schema), validate=True)
     @api.marshal_with(serializers.kit_model, code=200)
-    @api.doc(responses={
-        200: 'It works!',
-        400: 'Checkout the payload and query strings, bad parameter.',
-        404: 'The Resource doesnt exists.',
-        500: 'Sorry, this is my own fault.'
-    })
+    @api.doc(responses=responses_doc_for(200, 400, 404, 500))
     def put(self, kit_id: str):
         kit_update_command = serializers.kit_update_parser.parse_args()
         kit_update_command['kit_products'] = [
@@ -171,11 +135,7 @@ class KitResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Kit Not Found.', kit_id=kit_id)
 
-    @api.doc(responses={
-        204: 'It works!',
-        500: 'Sorry, this is my own fault.',
-        404: 'The Resource doesnt exists.'
-    })
+    @api.doc(responses=responses_doc_for(204, 404, 500))
     def delete(self, kit_id: str):
         try:
             self.__kits_service.remove_kit(kit_id)
@@ -190,11 +150,7 @@ class CalculatedKitResource(ResourceBase):
         super(CalculatedKitResource, self).__init__(*args, **kwargs)
         self.__calculated_kits_service = kwargs['calculated_kits_service']
 
-    @api.doc(responses={
-        200: 'It works!',
-        500: 'Sorry, this is my own fault.',
-        404: 'The Resource doesnt exists.'
-    })
+    @api.doc(responses=responses_doc_for(200, 404, 500))
     @api.marshal_with(serializers.calculated_kit_model, code=200)
     def get(self, kit_id: str):
         try:

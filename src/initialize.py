@@ -19,7 +19,7 @@ connections.register(web_app)
 product_repository = MongoProductRepository(connections.mongo_kit_db)
 kit_repository = MongoKitRepository(connections.mongo_kit_db)
 
-products_service = ProductsService(product_repository)
+products_service = ProductsService(product_repository, kit_repository)
 kits_service = KitsService(kit_repository, product_repository)
 calculated_kits_service = CalculatedKitsService(kit_repository, product_repository)
 

@@ -30,7 +30,7 @@ kit_product_field = api.model('KitProduct', {
     'discountPercentage': fields.Float(attribute='discount_percentage')
 })
 
-kit_model = api.model('Product', {
+kit_model = api.model('Kit', {
     'id': fields.String,
     'name': fields.String,
     'SKU': fields.String,

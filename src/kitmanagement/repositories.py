@@ -1,3 +1,4 @@
+from abc import ABC
 from copy import deepcopy
 from typing import List, Union
 
@@ -77,12 +78,12 @@ class InMemoryProductRepository(ProductRepository):
         return None
 
 
-class InMemoryKitRepository(KitRepository):
+class InMemoryKitRepository(KitRepository, ABC):
 
     def __init__(self):
         self.__kits : List[Kit] = []
 
-    def add(self, kit: Kit) -> int:
+    def add(self, kit: Kit) -> Union[int, str]:
         kit = deepcopy(kit)
         kit.define_id(self.__next_id())
         self.__raise_if_SKU_already_exists(kit.SKU)
@@ -91,6 +92,14 @@ class InMemoryKitRepository(KitRepository):
 
     def list(self, for_read=True) -> List[Kit]:
         return self.__kits
+
+    def list_with_product(self, product_SKU: str) -> List[Kit]:
+        kits = []
+        for kit in self.__kits:
+            for kit_product in kit.kit_products:
+                if kit_product.product_SKU == product_SKU:
+                    kits.append(kit)
+        return kits
 
     def get_by_id(self, kit_id) -> Kit:
         for kit in self.__kits:
@@ -213,7 +222,10 @@ class MongoKitRepository(KitRepository):
         self.__collection = self.__mongo_db['kits']
 
     def list(self) -> List[Kit]:
-        return [self.__create_kit_from_mongo(mongo_product) for mongo_product in self.__collection.find()]
+        return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find()]
+
+    def list_with_product(self, product_SKU: str) -> List[Kit]:
+        return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find({"kitProducts.productSKU": product_SKU})]
 
     def add(self, kit: Kit) -> str:
         try:
@@ -251,7 +263,7 @@ class MongoKitRepository(KitRepository):
                 quantity=kit_product_mongo['quantity'],
                 discount_percentage=kit_product_mongo['discountPercentage']
             )
-            for kit_product_mongo in kit_mongo.pop('kit_products')
+            for kit_product_mongo in kit_mongo.pop('kitProducts')
         ]
         return Kit(
             id=str(kit_mongo['_id']),
@@ -272,5 +284,5 @@ class MongoKitRepository(KitRepository):
         return {
             'name': kit.name,
             'SKU': kit.SKU,
-            'kit_products': kit_products_mongo
+            'kitProducts': kit_products_mongo
         }

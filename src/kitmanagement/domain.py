@@ -83,7 +83,7 @@ class Kit(AggregateRoot):
     def kit_products(self) -> List[KitProduct]:
         return self.__kit_products
 
-    def define_id(self, product_id: int) -> None:
+    def define_id(self, product_id: Union[int, str]) -> None:
         if self.__id:
             raise IdAlreadyDefined
         self.__id = product_id
@@ -190,6 +190,10 @@ class KitRepository(ABC):
 
     @abstractmethod
     def list(self) -> List[Kit]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_with_product(self, product_SKU: str) -> List[Kit]:
         raise NotImplementedError
 
     @abstractmethod

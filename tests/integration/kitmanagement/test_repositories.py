@@ -4,7 +4,7 @@ from src import configurations
 from src.exceptions import NotFound, SKUExistsError
 from src.kitmanagement.domain import Product, Kit, KitProduct
 from src.kitmanagement.repositories import InMemoryProductRepository, InMemoryKitRepository, MongoProductRepository, MongoKitRepository
-from tests.integration.base import TestCase
+from tests.integration.testbase import TestCase
 
 
 config = configurations.get_config()
@@ -460,6 +460,81 @@ class TestInMemoryKitRepository(TestCase):
         self.assertEqual(kit.kit_products[0], kit.kit_products[0])
         self.assertEqual(kit.kit_products[1], kit.kit_products[1])
 
+    def test_list_with_product(self):
+        repository = InMemoryKitRepository()
+
+        first_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-14891',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        first_kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=first_kit_products
+        )
+        second_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=9,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1479',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        second_kit = Kit(
+            name='Sony Gaming Pack II',
+            SKU='FASD-7894',
+            kit_products=second_kit_products
+        )
+        third_kit_products = [
+            KitProduct(
+                product_SKU='FASD-49809',
+                quantity=9,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-147099',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        third_kit = Kit(
+            name='Sony Gaming Pack III',
+            SKU='FASD-78990',
+            kit_products=third_kit_products
+        )
+        first_kit_id = repository.add(first_kit)
+        second_kit_id = repository.add(second_kit)
+        third_kit_id = repository.add(third_kit)
+
+        created_kits = repository.list_with_product('FASD-498')
+
+        self.assertIsInstance(created_kits, list)
+        self.assertEqual(2, len(created_kits))
+
+        self.assertEqual(first_kit_id, created_kits[0].id)
+        self.assertEqual(first_kit.SKU, created_kits[0].SKU)
+        self.assertEqual(first_kit.name, created_kits[0].name)
+        self.assertEqual(first_kit.kit_products[0], created_kits[0].kit_products[0])
+        self.assertEqual(first_kit.kit_products[1], created_kits[0].kit_products[1])
+
+        self.assertEqual(second_kit_id, created_kits[1].id)
+        self.assertEqual(second_kit.SKU, created_kits[1].SKU)
+        self.assertEqual(second_kit.name, created_kits[1].name)
+        self.assertEqual(second_kit.kit_products[0], created_kits[1].kit_products[0])
+        self.assertEqual(second_kit.kit_products[1], created_kits[1].kit_products[1])
+
 
 class TestMongoProductRepository(TestCase):
 
@@ -804,6 +879,81 @@ class TestMongoKitRepository(TestCase):
         second_kit_id = repository.add(second_kit)
 
         created_kits = repository.list()
+
+        self.assertIsInstance(created_kits, list)
+        self.assertEqual(2, len(created_kits))
+
+        self.assertEqual(first_kit_id, created_kits[0].id)
+        self.assertEqual(first_kit.SKU, created_kits[0].SKU)
+        self.assertEqual(first_kit.name, created_kits[0].name)
+        self.assertEqual(first_kit.kit_products[0], created_kits[0].kit_products[0])
+        self.assertEqual(first_kit.kit_products[1], created_kits[0].kit_products[1])
+
+        self.assertEqual(second_kit_id, created_kits[1].id)
+        self.assertEqual(second_kit.SKU, created_kits[1].SKU)
+        self.assertEqual(second_kit.name, created_kits[1].name)
+        self.assertEqual(second_kit.kit_products[0], created_kits[1].kit_products[0])
+        self.assertEqual(second_kit.kit_products[1], created_kits[1].kit_products[1])
+
+    def test_list_with_product(self):
+        repository = MongoKitRepository(self.mongo_db)
+
+        first_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=2,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-14891',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        first_kit = Kit(
+            name='Sony Gaming Pack',
+            SKU='FASD-789',
+            kit_products=first_kit_products
+        )
+        second_kit_products = [
+            KitProduct(
+                product_SKU='FASD-498',
+                quantity=9,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-1479',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        second_kit = Kit(
+            name='Sony Gaming Pack II',
+            SKU='FASD-7894',
+            kit_products=second_kit_products
+        )
+        third_kit_products = [
+            KitProduct(
+                product_SKU='FASD-49809',
+                quantity=9,
+                discount_percentage=10.5
+            ),
+            KitProduct(
+                product_SKU='FASD-147099',
+                quantity=1,
+                discount_percentage=10.5
+            )
+        ]
+        third_kit = Kit(
+            name='Sony Gaming Pack III',
+            SKU='FASD-78990',
+            kit_products=third_kit_products
+        )
+        first_kit_id = repository.add(first_kit)
+        second_kit_id = repository.add(second_kit)
+        third_kit_id = repository.add(third_kit)
+
+        created_kits = repository.list_with_product('FASD-498')
 
         self.assertIsInstance(created_kits, list)
         self.assertEqual(2, len(created_kits))

@@ -6,7 +6,7 @@ from flask import Flask
 from src import configurations
 
 config = configurations.get_config()
-mongo_client  = None
+mongo_client = None
 mongo_kit_db = None
 
 

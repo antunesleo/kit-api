@@ -12,3 +12,7 @@ class IdAlreadyDefined(Exception):
 
 class SKUExistsError(Exception):
     pass
+
+
+class ProductInUseError(Exception):
+    pass

@@ -1,15 +1,17 @@
 from unittest import mock
 
+from src.exceptions import ProductInUseError
 from src.kitmanagement.application_services import ProductsService, KitsService, CalculatedKitsService
 from src.kitmanagement.domain import Kit, KitProduct, CalculatedKit
-from tests.unit.base import TestCase
+from tests.unit.testbase import TestCase
 
 
 class TestProductsService(TestCase):
 
     def test_create_product(self,):
+        kit_repository_mock = mock.MagicMock()
         repository_mock = mock.MagicMock()
-        service = ProductsService(repository_mock)
+        service = ProductsService(repository_mock, kit_repository_mock)
         product_creation_command = {
             'name': 'The Last of Us Part II',
             'SKU': 'AHJU-49685',
@@ -28,30 +30,55 @@ class TestProductsService(TestCase):
         self.assertEqual(product.inventory_quantity, 150)
 
     def test_list_products(self):
+        kit_repository_mock = mock.MagicMock()
         products_mock = mock.MagicMock()
         repository_mock = mock.MagicMock()
         repository_mock.list.return_value = products_mock
-        service = ProductsService(repository_mock)
+        service = ProductsService(repository_mock, kit_repository_mock)
         products = service.list_products()
         repository_mock.list.assert_called()
         self.assertEqual(products_mock, products)
 
     def test_get_product(self):
+        kit_repository_mock = mock.MagicMock()
         product_mock = mock.MagicMock()
         repository_mock = mock.MagicMock()
         repository_mock.get_by_id.return_value = product_mock
-        service = ProductsService(repository_mock)
+        service = ProductsService(repository_mock, kit_repository_mock)
         product = service.get_product(1)
         repository_mock.get_by_id.assert_called_with(1)
         self.assertEqual(product_mock, product)
 
     def test_remove_product(self):
-        repository_mock = mock.MagicMock()
-        service = ProductsService(repository_mock)
+        kit_repository_mock = mock.MagicMock()
+        kit_repository_mock.list_with_product.return_value = []
+
+        product_mock = mock.MagicMock(SKU='FASD-1')
+        product_repository_mock = mock.MagicMock()
+        product_repository_mock.get_by_id.return_value = product_mock
+
+        service = ProductsService(product_repository_mock, kit_repository_mock)
         service.remove_product(1)
-        repository_mock.remove.assert_called_with(1)
+        product_repository_mock.remove.assert_called_with(1)
+        kit_repository_mock.list_with_product.assert_called_with('FASD-1')
+
+    def test_remove_product_should_raise_product_in_use_error_when_product_is_being_used_by_any_kit(self):
+        kit_repository_mock = mock.MagicMock()
+        kit_repository_mock.list_with_product.return_value = [mock.MagicMock()]
+
+        product_mock = mock.MagicMock(SKU='FASD-1')
+        product_repository_mock = mock.MagicMock()
+        product_repository_mock.get_by_id.return_value = product_mock
+
+        service = ProductsService(product_repository_mock, kit_repository_mock)
+        with self.assertRaises(ProductInUseError):
+            service.remove_product(1)
+
+        product_repository_mock.remove.assert_not_called()
+        kit_repository_mock.list_with_product.assert_called_with('FASD-1')
 
     def test_update_product(self):
+        kit_repository_mock = mock.MagicMock()
         product_update_command = {
             'name': 'The Last of Us Part II',
             'SKU': 'AHJU-49685',
@@ -63,7 +90,7 @@ class TestProductsService(TestCase):
         repository_mock = mock.MagicMock()
         repository_mock.get_by_id.return_value = product_mock
 
-        service = ProductsService(repository_mock)
+        service = ProductsService(repository_mock, kit_repository_mock)
         updated_product = service.update_product(1, product_update_command)
 
         self.assertEqual(updated_product, product_mock)
