@@ -1,7 +1,7 @@
 from flask import request
 from flask_restx import Resource, marshal
 
-from src.base.serializers import CaseStyleConverter
+from src.base.serialization import CaseStyleConverter
 
 RESPONSES_DOC = {
     200: 'OK. Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action',
