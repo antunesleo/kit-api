@@ -1,6 +1,4 @@
-from copy import deepcopy
-
-from flask_restx import fields, reqparse
+from flask_restx import fields
 from src.web_app import get_api
 
 api = get_api()
@@ -14,17 +12,23 @@ product_model = api.model('Product', {
     'inventoryQuantity': fields.String(attribute='inventory_quantity')
 })
 
-product_creation_parser = reqparse.RequestParser()
-product_creation_parser.add_argument('name', type=str, required=True, location='json')
-product_creation_parser.add_argument('sku', type=str, required=True, location='json')
-product_creation_parser.add_argument('cost', type=float, required=True, location='json')
-product_creation_parser.add_argument('price', type=float, required=True, location='json')
-product_creation_parser.add_argument('inventoryQuantity', dest='inventory_quantity', type=int, required=True, location='json')
+product_creation_command_model = api.model('ProductCreationCommand', {
+    'name': fields.String(required=True),
+    'sku': fields.String(required=True),
+    'cost': fields.String(required=True),
+    'price': fields.String(required=True),
+    'inventoryQuantity': fields.String(required=True, attribute='inventory_quantity')
+})
 
-product_update_parser = deepcopy(product_creation_parser)
-product_update_parser.remove_argument('sku')
+product_update_command_model = api.model('ProductUpdateCommand', {
+    'name': fields.String(required=True),
+    'cost': fields.String(required=True),
+    'price': fields.String(required=True),
+    'inventoryQuantity': fields.String(required=True, attribute='inventory_quantity')
+})
 
-kit_product_field = api.model('KitProduct', {
+
+kit_product_field_out = api.model('KitProductFieldOut', {
     'productSku': fields.String(attribute='product_sku'),
     'quantity': fields.Integer,
     'discountPercentage': fields.Float(attribute='discount_percentage')
@@ -34,25 +38,24 @@ kit_model = api.model('Kit', {
     'id': fields.String,
     'name': fields.String,
     'sku': fields.String,
-    'kitProducts': fields.List(fields.Nested(kit_product_field), attribute='kit_products')
+    'kitProducts': fields.List(fields.Nested(kit_product_field_out), attribute='kit_products')
 })
 
-
-kit_product_for_command_field = api.model('KitProductForCommandField', {
-    'productSku': fields.String(required=True, attribute='productSku'),
+kit_product_field_in = api.model('KitProductFieldIn', {
+    'productSku': fields.String(required=True),
     'quantity': fields.Integer(required=True),
-    'discountPercentage': fields.Float(required=True, attribute='discountPercentage')
+    'discountPercentage': fields.Float(required=True)
 })
 
 kit_creation_command_model = api.model('KitCreationCommand', {
     'name': fields.String(required=True),
     'sku': fields.String(required=True),
-    'kitProducts': fields.List(fields.Nested(kit_product_for_command_field), attribute='kitProducts', required=True)
+    'kitProducts': fields.List(fields.Nested(kit_product_field_in), required=True)
 })
 
 kit_update_command_model = api.model('KitUpdateCommand', {
     'name': fields.String(required=True),
-    'kitProducts': fields.List(fields.Nested(kit_product_for_command_field), attribute='kitProducts', required=True)
+    'kitProducts': fields.List(fields.Nested(kit_product_field_in), required=True)
 })
 
 calculated_kit_model = api.model('CalculatedKit', {

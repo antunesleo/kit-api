@@ -1,6 +1,5 @@
-from typing import List
-
-from flask_restx import Resource
+from flask import request
+from flask_restx import Resource, marshal
 
 from src.base.serializers import CaseStyleConverter
 
@@ -31,3 +30,6 @@ class ResourceBase(Resource):
     def __init__(self,  *args, **kwargs):
         super(ResourceBase, self).__init__( *args, **kwargs)
         self._converter = CaseStyleConverter()
+
+    def _serialize_in(self, model):
+        return self._converter.camel_to_snake(marshal(request.json, model))

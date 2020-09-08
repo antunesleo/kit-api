@@ -1,4 +1,5 @@
 from flask import request
+from flask_restx import marshal
 from flask_restx.reqparse import ParseResult
 
 from src.exceptions import NotFound, skuExistsError, ProductInUseError
@@ -23,11 +24,11 @@ class ProductsResource(ResourceBase):
     def get(self):
         return self.__products_service.list_products()
 
-    @api.expect(serializers.product_creation_parser)
+    @api.expect(serializers.product_creation_command_model, validate=True)
     @api.marshal_with(serializers.product_model, code=201)
     @api.doc(responses=responses_doc_for(201, 400, 500))
     def post(self):
-        product_creation_command = serializers.product_creation_parser.parse_args()
+        product_creation_command = self._serialize_in(serializers.product_creation_command_model)
         try:
             product = self.__products_service.create_product(product_creation_command)
             return product, 201
@@ -49,12 +50,12 @@ class ProductResource(ResourceBase):
         except NotFound:
             api.abort(404, 'Product Not Found.', product_id=product_id)
 
-    @api.expect(serializers.product_update_parser)
+    @api.expect(serializers.product_update_command_model, validate=True)
     @api.marshal_with(serializers.product_model, code=200)
     @api.doc(responses=responses_doc_for(200, 404, 500))
     def put(self, product_id: str):
         try:
-            product_update_command = serializers.product_update_parser.parse_args()
+            product_update_command = self._serialize_in(serializers.product_update_command_model)
             product = self.__products_service.update_product(product_id, product_update_command)
             return product, 200
         except NotFound:
@@ -82,7 +83,7 @@ class KitsResource(ResourceBase):
     @api.marshal_with(serializers.kit_model, code=201)
     @api.doc(responses=responses_doc_for(201, 400, 404, 500))
     def post(self):
-        kit_creation_command = self._converter.camel_to_snake(request.json)
+        kit_creation_command = self._serialize_in(serializers.kit_creation_command_model)
 
         try:
             kit = self.__kits_service.create_kit(kit_creation_command)
@@ -117,7 +118,7 @@ class KitResource(ResourceBase):
     @api.marshal_with(serializers.kit_model, code=200)
     @api.doc(responses=responses_doc_for(200, 400, 404, 500))
     def put(self, kit_id: str):
-        kit_update_command = self._converter.camel_to_snake(request.json)
+        kit_update_command = self._serialize_in(serializers.kit_update_command_model)
 
         try:
             return self.__kits_service.update_kit(kit_id, kit_update_command)
