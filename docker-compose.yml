@@ -27,7 +27,7 @@ services:
     volumes:
     - ./:/code
     env_file:
-      - .env.docker
+      - .env
     restart: unless-stopped
     command: >
         bash -c "flask run"

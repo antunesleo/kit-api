@@ -2,36 +2,12 @@
 
 A simple Product and Kit Management for an e-commerce application.
 
-## Setting Up Local
-
-#### Installing
-    $ cd kit-api
-    $ cp .env.sample .env
-    $ cp .env.sample .env.test
-    $ mkdir logs
-    $ python3.8 -m venv kit-api
-    $ source kit-api/bin/activate
-    $ pip install -r requirements.txt
-    $ pip install -r requirements_dev.txt
-
-#### Running
-
-    $ export $(cat .env | xargs)
-    $ flask run
-    
-   Go to http://0.0.0.0:8007 and enjoy the api with swagger.
-    
-#### Running tests
-
-    $ export $(cat .env | xargs)
-    $ python3.8 -m unittest
-
-## Setting up Docker
+## Setting up with Docker
 
 #### Installing
 
 ```
-$ cp .env.sample .env.docker
+$ cp .env.sample .env
 $ docker-compose up --build -d
 ```
 
@@ -111,3 +87,30 @@ Kits:
   ]
 }
 ```
+
+## Setting Up Local
+
+#### Installing prerequisites
+* MongoDB
+
+#### Installing
+    $ cd kit-api
+    $ cp .env.sample .env
+    $ cp .env.sample .env.test
+    $ mkdir logs
+    $ python3.8 -m venv kit-api
+    $ source kit-api/bin/activate
+    $ pip install -r requirements.txt
+    $ pip install -r requirements_dev.txt
+
+#### Running
+
+    $ export $(cat .env | xargs)
+    $ flask run
+    
+   Go to http://0.0.0.0:8007 and enjoy the api with swagger.
+    
+#### Running tests
+
+    $ export $(cat .env | xargs)
+    $ python3.8 -m unittest
