@@ -25,8 +25,8 @@ def get_api():
         api = Api(
             get_web_app(),
             version='1.0',
-            title='Flask Boilerplate API',
-            description='Nothing is created, everything is transformed. Enjoy the template!'
+            title='Kit API',
+            description='Enjoy the API.'
         )
 
     return api
