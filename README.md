@@ -7,7 +7,7 @@ A simple Product and Kit Management for an e-commerce application.
 #### Installing
 
 ```
-$ cp .env.sample .env
+$ cp .env.docker.sample .env
 $ docker-compose up --build -d
 ```
 
