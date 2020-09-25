@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 from src.exceptions import IdAlreadyDefined
 from src.base.domain import AggregateRoot, ValueObject
@@ -158,11 +158,11 @@ class CalculatedKit:
 class ProductRepository(ABC):
 
     @abstractmethod
-    def list(self) -> List[Product]:
+    def list(self) -> Tuple[Product]:
         raise NotImplementedError
 
     @abstractmethod
-    def list_with_skus(self, skus: List[str]) -> List[Product]:
+    def list_with_skus(self, skus: List[str]) -> Tuple[Product]:
         raise NotImplementedError
 
     @abstractmethod
@@ -189,11 +189,11 @@ class ProductRepository(ABC):
 class KitRepository(ABC):
 
     @abstractmethod
-    def list(self) -> List[Kit]:
+    def list(self) -> Tuple[Kit]:
         raise NotImplementedError
 
     @abstractmethod
-    def list_with_product(self, product_sku: str) -> List[Kit]:
+    def list_with_product(self, product_sku: str) -> Tuple[Kit]:
         raise NotImplementedError
 
     @abstractmethod

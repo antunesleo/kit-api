@@ -84,7 +84,7 @@ class TestInMemoryProductRepository(TestCase):
 
         created_products = repository.list()
 
-        self.assertIsInstance(created_products, list)
+        self.assertIsInstance(created_products, tuple)
         self.assertEqual(2, len(created_products))
 
         self.assertEqual(first_product_id, created_products[0].id)
@@ -129,7 +129,7 @@ class TestInMemoryProductRepository(TestCase):
 
         skus_products = repository.list_with_skus(['AHJU-49685', 'AHJU-49684'])
 
-        self.assertIsInstance(skus_products, list)
+        self.assertIsInstance(skus_products, tuple)
         self.assertEqual(2, len(skus_products))
 
         self.assertEqual(first_product_id, skus_products[0].id)
@@ -320,7 +320,7 @@ class TestInMemoryKitRepository(TestCase):
 
         created_kits = repository.list()
 
-        self.assertIsInstance(created_kits, list)
+        self.assertIsInstance(created_kits, tuple)
         self.assertEqual(2, len(created_kits))
 
         self.assertEqual(first_kit_id, created_kits[0].id)
@@ -520,7 +520,7 @@ class TestInMemoryKitRepository(TestCase):
 
         created_kits = repository.list_with_product('FASD-498')
 
-        self.assertIsInstance(created_kits, list)
+        self.assertIsInstance(created_kits, tuple)
         self.assertEqual(2, len(created_kits))
 
         self.assertEqual(first_kit_id, created_kits[0].id)
@@ -646,7 +646,7 @@ class TestMongoProductRepository(TestCase):
 
         created_products = repository.list()
 
-        self.assertIsInstance(created_products, list)
+        self.assertIsInstance(created_products, tuple)
         self.assertEqual(2, len(created_products))
 
         self.assertEqual(first_product_id, created_products[0].id)
@@ -692,7 +692,7 @@ class TestMongoProductRepository(TestCase):
 
         skus_products = repository.list_with_skus(['AHJU-49685', 'AHJU-49684'])
 
-        self.assertIsInstance(skus_products, list)
+        self.assertIsInstance(skus_products, tuple)
         self.assertEqual(2, len(skus_products))
 
         self.assertEqual(first_product_id, skus_products[0].id)
@@ -880,7 +880,7 @@ class TestMongoKitRepository(TestCase):
 
         created_kits = repository.list()
 
-        self.assertIsInstance(created_kits, list)
+        self.assertIsInstance(created_kits, tuple)
         self.assertEqual(2, len(created_kits))
 
         self.assertEqual(first_kit_id, created_kits[0].id)
@@ -955,7 +955,7 @@ class TestMongoKitRepository(TestCase):
 
         created_kits = repository.list_with_product('FASD-498')
 
-        self.assertIsInstance(created_kits, list)
+        self.assertIsInstance(created_kits, tuple)
         self.assertEqual(2, len(created_kits))
 
         self.assertEqual(first_kit_id, created_kits[0].id)

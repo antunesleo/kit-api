@@ -1,6 +1,6 @@
 from abc import ABC
 from copy import deepcopy
-from typing import List
+from typing import List, Tuple
 
 from bson.objectid import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -21,8 +21,8 @@ class InMemoryProductRepository(ProductRepository):
         self.__products.append(product)
         return product.id
 
-    def list(self, for_read=True) -> List[Product]:
-        return self.__products
+    def list(self, for_read=True) -> Tuple[Product]:
+        return tuple(self.__products)
 
     def get_by_id(self, product_id: str) -> Product:
         for product in self.__products:
@@ -62,8 +62,8 @@ class InMemoryProductRepository(ProductRepository):
 
         self.__products[index_to_update] = product_to_update
 
-    def list_with_skus(self, skus: List[str]) -> List[Product]:
-        return[product for product in self.__products if product.sku in skus]
+    def list_with_skus(self, skus: List[str]) -> Tuple[Product]:
+        return tuple(product for product in self.__products if product.sku in skus)
 
     def __next_id(self) -> str:
         try:
@@ -90,16 +90,16 @@ class InMemoryKitRepository(KitRepository, ABC):
         self.__kits.append(kit)
         return kit.id
 
-    def list(self, for_read=True) -> List[Kit]:
-        return self.__kits
+    def list(self, for_read=True) -> Tuple[Kit]:
+        return tuple(self.__kits)
 
-    def list_with_product(self, product_sku: str) -> List[Kit]:
+    def list_with_product(self, product_sku: str) -> Tuple[Kit]:
         kits = []
         for kit in self.__kits:
             for kit_product in kit.kit_products:
                 if kit_product.product_sku == product_sku:
                     kits.append(kit)
-        return kits
+        return tuple(kits)
 
     def get_by_id(self, kit_id) -> Kit:
         for kit in self.__kits:
@@ -152,14 +152,14 @@ class MongoProductRepository(ProductRepository):
         self.__mongo_db = mongo_db
         self.__collection = self.__mongo_db['products']
 
-    def list(self) -> List[Product]:
-        return [self.__create_product_from_mongo(mongo_product) for mongo_product in self.__collection.find()]
+    def list(self) -> Tuple[Product]:
+        return tuple(self.__create_product_from_mongo(mongo_product) for mongo_product in self.__collection.find())
 
-    def list_with_skus(self, skus: List[str]) -> List[Product]:
-        return [
+    def list_with_skus(self, skus: List[str]) -> Tuple[Product]:
+        return tuple(
             self.__create_product_from_mongo(mongo_product)
             for mongo_product in self.__collection.find({'sku': {'$in': skus}}).sort('_id')
-        ]
+        )
 
     def add(self, product: Product) -> str:
         try:
@@ -221,11 +221,11 @@ class MongoKitRepository(KitRepository):
         self.__mongo_db = mongo_db
         self.__collection = self.__mongo_db['kits']
 
-    def list(self) -> List[Kit]:
-        return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find()]
+    def list(self) -> Tuple[Kit]:
+        return tuple(self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find())
 
-    def list_with_product(self, product_sku: str) -> List[Kit]:
-        return [self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find({"kitProducts.productSku": product_sku})]
+    def list_with_product(self, product_sku: str) -> Tuple[Kit]:
+        return tuple(self.__create_kit_from_mongo(mongo_kit) for mongo_kit in self.__collection.find({"kitProducts.productSku": product_sku}))
 
     def add(self, kit: Kit) -> str:
         try:
